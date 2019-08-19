@@ -66,8 +66,7 @@ class DebugContext(ContextDecorator):
     def __init__(self):
         self.iterations: List[Iteration] = []
 
-    @property
-    def digraph(self):
+    def create_digraph(self):
         stream = StringIO()
         stream.write('digraph {\n')
         for step, iteration in enumerate(self.iterations):

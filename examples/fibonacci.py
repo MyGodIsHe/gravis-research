@@ -1,6 +1,8 @@
 #!/usr/bin/env python3
 import operator
 
+import graphviz
+
 from gravis import *
 
 
@@ -28,7 +30,9 @@ def main(input_value):
     fib = Subspace(input)
     with DebugContext() as debug:
         fib.in_nodes[0].activate(input_value, None)
-        print(debug.digraph)
+        digraph = debug.create_digraph()
+        dot = graphviz.Source(digraph)
+        dot.render(view=True)
 
 
 if __name__ == '__main__':
