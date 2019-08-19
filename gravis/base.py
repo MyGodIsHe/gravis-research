@@ -2,7 +2,7 @@ import functools
 from contextlib import ContextDecorator
 from enum import Enum
 from io import StringIO
-from typing import Any, NamedTuple, List
+from typing import Any, NamedTuple, List, Tuple
 
 __all__ = (
     'Node',
@@ -10,47 +10,43 @@ __all__ = (
 )
 
 
-def get_name(self):
-    from .nodes import Constant
-
-    if isinstance(self, Node):
-        for key, value in globals().items():
-            if value == self:
-                return key
-        uuniq = hex(id(self))[2:]
-        if isinstance(self, Constant):
-            result = '{}({})'.format(self, self.value)
-        else:
-            result = repr(self)
-        return r'{}\n{}'.format(result, uuniq)
-    return repr(self)
-
-
-def method_logger(func):
-
-    @functools.wraps(func)
-    def wrapper(self, *args):
-        debug = DebugContext.current()
-        if debug:
-            debug.iterations.append(Iteration(
-                src=get_name(args[-1]),
-                dst=get_name(self),
-                direction=Direction(func.__name__ == 'activate'),
-                args=tuple(get_name(item) for item in args[:-1]),
-            ))
-        return func(self, *args)
-    return wrapper
-
-
 class Direction(Enum):
     back = False
     forward = True
 
 
+class NodeName(NamedTuple):
+    label: str
+    id: str
+
+    @staticmethod
+    def get_pair(node: 'Node'):
+        from .nodes import Constant
+
+        if isinstance(node, Node):
+            for key, value in globals().items():
+                if value == node:
+                    return key, value
+            if isinstance(node, Constant):
+                result = '{}({})'.format(node, node.value)
+            else:
+                result = repr(node)
+        else:
+            result = repr(node)
+
+        return result, node
+
+    @staticmethod
+    def create(node: 'Node') -> 'NodeName':
+        label, obj = NodeName.get_pair(node)
+        uuid = hex(id(obj))[2:]
+        return NodeName(label=label, id=uuid)
+
+
 class Iteration(NamedTuple):
-    src: str
-    dst: str
-    args: tuple
+    src: NodeName
+    dst: NodeName
+    args: Tuple[NodeName]
     direction: Direction
 
     @property
@@ -59,7 +55,11 @@ class Iteration(NamedTuple):
 
     @property
     def label_args(self):
-        return '({})'.format(', '.join(self.args)) if self.args else ''
+        if self.args:
+            return '({})'.format(
+                ', '.join(arg.label for arg in self.args)
+            )
+        return ''
 
 
 class DebugContext(ContextDecorator):
@@ -71,16 +71,27 @@ class DebugContext(ContextDecorator):
     def create_digraph(self):
         stream = StringIO()
         stream.write('digraph {\n')
+
         for step, iteration in enumerate(self.iterations):
             stream.write(
-                '\t"{src}" -> "{dst}"[label="[{step}]{args}";style={style}]\n'.format(
-                    src=iteration.src,
-                    dst=iteration.dst,
+                '\t"{src}" -> "{dst}"'
+                '[label="[{step}]{args}";style={style}];\n'.format(
+                    src=iteration.src.id,
+                    dst=iteration.dst.id,
                     step=step + 1,
                     args=iteration.label_args,
                     style=iteration.style,
                 )
             )
+
+        nodes = set()
+        for iteration in self.iterations:
+            nodes.add(iteration.src)
+            nodes.add(iteration.dst)
+
+        for node in nodes:
+            stream.write('\t"{}" [label="{}"];\n'.format(node.id, node.label))
+
         stream.write('}\n')
         return stream.getvalue()
 
@@ -94,6 +105,22 @@ class DebugContext(ContextDecorator):
     @classmethod
     def current(cls):
         return cls.STACK[-1] if cls.STACK else None
+
+
+def method_logger(func):
+
+    @functools.wraps(func)
+    def wrapper(self, *args):
+        debug = DebugContext.current()
+        if debug:
+            debug.iterations.append(Iteration(
+                src=NodeName.create(args[-1]),
+                dst=NodeName.create(self),
+                direction=Direction(func.__name__ == 'activate'),
+                args=tuple(NodeName.create(item) for item in args[:-1]),
+            ))
+        return func(self, *args)
+    return wrapper
 
 
 class NodeMeta(type):
