@@ -20,26 +20,22 @@ class NodeName(NamedTuple):
     id: str
 
     @staticmethod
-    def get_pair(node: 'Node'):
-        from .nodes import Constant
+    def create(node: 'Node') -> 'NodeName':
+        from . import nodes
 
         if isinstance(node, Node):
-            for key, value in globals().items():
-                if value == node:
-                    return key, value
-            if isinstance(node, Constant):
-                result = '{}({})'.format(node, node.value)
+            if isinstance(node, nodes.Constant):
+                label = '{}({})'.format(node, node.value)
+            elif isinstance(node, nodes.If):
+                label = '{}({})'.format(node, node.operator.__name__)
+            elif isinstance(node, nodes.Operator):
+                label = '{}({})'.format(node, node.operator.__name__)
             else:
-                result = repr(node)
+                label = repr(node)
         else:
-            result = repr(node)
+            label = repr(node)
 
-        return result, node
-
-    @staticmethod
-    def create(node: 'Node') -> 'NodeName':
-        label, obj = NodeName.get_pair(node)
-        uuid = hex(id(obj))[2:]
+        uuid = hex(id(node))[2:]
         return NodeName(label=label, id=uuid)
 
 
@@ -56,10 +52,25 @@ class Iteration(NamedTuple):
     @property
     def label_args(self):
         if self.args:
-            return '({})'.format(
-                ', '.join(arg.label for arg in self.args)
-            )
+            return ', '.join(str(arg) for arg in self.args)
         return ''
+
+    def render(self, step):
+        label_args = self.label_args
+        if label_args:
+            label = r'[{}]\n{}'.format(step, label_args)
+        else:
+            label = '[{}]'.format(step)
+        return (
+            '\t"{src}" -> "{dst}" '
+            '[label="{label}";style={style}];'
+            '\n'.format(
+                src=self.src.id,
+                dst=self.dst.id,
+                label=label,
+                style=self.style,
+            )
+        )
 
 
 class DebugContext(ContextDecorator):
@@ -72,20 +83,13 @@ class DebugContext(ContextDecorator):
         stream = StringIO()
         stream.write('digraph {\n')
 
-        for step, iteration in enumerate(self.iterations):
-            stream.write(
-                '\t"{src}" -> "{dst}"'
-                '[label="[{step}]{args}";style={style}];\n'.format(
-                    src=iteration.src.id,
-                    dst=iteration.dst.id,
-                    step=step + 1,
-                    args=iteration.label_args,
-                    style=iteration.style,
-                )
-            )
+        for step, iteration in enumerate(self.iterations[1:]):
+            stream.write(iteration.render(step + 1))
 
         nodes = set()
         for iteration in self.iterations:
+            if iteration.src.label == 'None':
+                continue
             nodes.add(iteration.src)
             nodes.add(iteration.dst)
 
@@ -113,11 +117,13 @@ def method_logger(func):
     def wrapper(self, *args):
         debug = DebugContext.current()
         if debug:
+            values = args[:-1]
+            src_node = args[-1]
             debug.iterations.append(Iteration(
-                src=NodeName.create(args[-1]),
+                src=NodeName.create(src_node),
                 dst=NodeName.create(self),
                 direction=Direction(func.__name__ == 'activate'),
-                args=tuple(NodeName.create(item) for item in args[:-1]),
+                args=values,
             ))
         return func(self, *args)
     return wrapper
