@@ -30,12 +30,14 @@ def method_logger(func):
 
     @functools.wraps(func)
     def wrapper(self, *args):
-        DebugContext.current().iterations.append(Iteration(
-            src=get_name(args[-1]),
-            dst=get_name(self),
-            direction=Direction(func.__name__ == 'activate'),
-            args=tuple(get_name(item) for item in args[:-1]),
-        ))
+        debug = DebugContext.current()
+        if debug:
+            debug.iterations.append(Iteration(
+                src=get_name(args[-1]),
+                dst=get_name(self),
+                direction=Direction(func.__name__ == 'activate'),
+                args=tuple(get_name(item) for item in args[:-1]),
+            ))
         return func(self, *args)
     return wrapper
 
@@ -91,7 +93,7 @@ class DebugContext(ContextDecorator):
 
     @classmethod
     def current(cls):
-        return cls.STACK[-1]
+        return cls.STACK[-1] if cls.STACK else None
 
 
 class NodeMeta(type):
