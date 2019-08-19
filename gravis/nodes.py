@@ -1,68 +1,14 @@
-#!/usr/bin/env python3
-import functools
-import operator
-import sys
-from typing import Any
+from .base import Node
 
-line_terator = 0
-
-
-def get_name(self):
-    if isinstance(self, Node):
-        for key, value in globals().items():
-            if value == self:
-                return key
-        uuniq = hex(id(self))[2:]
-        if isinstance(self, Constant):
-            result = '{}({})'.format(self, self.value)
-        else:
-            result = repr(self)
-        return '{}\n{}'.format(result, uuniq)
-    return repr(self)
-
-
-def method_logger(func):
-
-    @functools.wraps(func)
-    def wrapper(self, *args):
-        global line_terator
-        line_terator += 1
-        named_args = tuple(get_name(item) for item in args[:-1])
-        style = 'solid' if func.__name__ == 'activate' else 'dotted'
-        label_args = '({})'.format(', '.join(named_args)) if named_args else ''
-        print(
-            '"{}" -> "{}"[label="[{}]{}";style={}]'.format(
-                get_name(args[-1]),
-                get_name(self),
-                line_terator,
-                label_args,
-                style,
-            )
-        )
-        return func(self, *args)
-    return wrapper
-
-
-class NodeMeta(type):
-
-    def __new__(mcls, name, bases, namespace, **kwargs):
-        for method in ['activate', 'activate_me']:
-            if method in namespace:
-                namespace[method] = method_logger(namespace[method])
-        return super().__new__(mcls, name, bases, namespace, **kwargs)
-
-
-class Node(metaclass=NodeMeta):
-    out_nodes: list
-    saved_value: Any
-
-    def __repr__(self):
-        return self.__class__.__name__
-
-    def __rshift__(self, other):
-        self.out_nodes.append(other)
-        if hasattr(other, 'connect'):
-            other.connect(self)
+__all__ = (
+    'Input',
+    'Output',
+    'Constant',
+    'If',
+    'Operator',
+    'Callback',
+    'Subspace',
+)
 
 
 class Input(Node):
@@ -214,27 +160,3 @@ class Subspace:
 
     def __init__(self, *in_nodes):
         self.in_nodes = in_nodes
-
-
-input = Input()
-if_le = If(operator.le)
-sub1 = Operator(operator.sub)
-sub2 = Operator(operator.sub)
-plus = Operator(operator.add)
-const1 = Constant(1)
-
-input >> if_le
-Constant(1) >> if_le
-if_le >> (True, const1)
-const1 >> Output()
-if_le >> (False, sub1)
-Constant(1) >> sub1
-sub1 >> plus
-if_le >> (False, sub2)
-Constant(2) >> sub2
-sub2 >> plus
-plus >> Output()
-
-fib = Subspace(input)
-
-fib.in_nodes[0].activate(int(sys.argv[1]), None)
