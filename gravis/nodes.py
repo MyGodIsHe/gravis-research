@@ -6,8 +6,6 @@ __all__ = (
     'Constant',
     'If',
     'Operator',
-    'Callback',
-    'Subspace',
 )
 
 
@@ -143,20 +141,3 @@ class Operator(Node):
 
     def connect(self, other):
         self.in_nodes.append(other)
-
-
-class Callback:
-
-    def __init__(self):
-        self.in_node = None
-        self.back_node = None
-        self.out_nodes = []
-
-    def activate(self, value, src_node):
-        self.in_values = {}
-
-
-class Subspace:
-
-    def __init__(self, *in_nodes):
-        self.in_nodes = in_nodes
