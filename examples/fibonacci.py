@@ -13,12 +13,12 @@ const1 = Constant(1)
 
 input >> if_le
 Constant(1) >> if_le
-if_le >> (True, const1)
+if_le >> branch_true(const1)
 const1 >> Output()
-if_le >> (False, sub1)
+if_le >> branch_false(sub1)
 Constant(1) >> sub1
 sub1 >> plus
-if_le >> (False, sub2)
+if_le >> branch_false(sub2)
 Constant(2) >> sub2
 sub2 >> plus
 plus >> Output()

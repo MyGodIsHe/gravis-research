@@ -6,6 +6,8 @@ __all__ = (
     'Constant',
     'If',
     'Operator',
+    'branch_true',
+    'branch_false',
 )
 
 
@@ -108,6 +110,14 @@ class If(Node):
             self.second_in_node = other
         else:
             raise Exception()
+
+
+def branch_true(node):
+    return True, node
+
+
+def branch_false(node):
+    return False, node
 
 
 class Operator(Node):
