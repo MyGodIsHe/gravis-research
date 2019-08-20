@@ -37,7 +37,8 @@ def render(digraph):
 def main(input_value):
     with DebugContext() as debug:
         input.activate(input_value, None)
-        render(debug.create_digraph())
+        digraph = debug.create_digraph()
+        render(digraph)
 
 
 if __name__ == '__main__':
