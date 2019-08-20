@@ -11,16 +11,16 @@ __all__ = (
 
 class Input(Node):
 
-    def __init__(self):
-        self.out_nodes = []
-
-    def activate(self, value, src_node):
+    def _activate(self, value, src_node):
         self.saved_value = value
         for node in self.out_nodes:
             node.activate(value, self)
 
+    def activate(self, value, src_node):
+        self._activate(value, src_node)
+
     def activate_me(self, dst_node):
-        self.activate(self.saved_value, self)
+        self._activate(self.saved_value, self)
 
 
 class Output(Node):
@@ -29,9 +29,6 @@ class Output(Node):
         self.saved_value = value
         print(value)
 
-    def __rshift__(self, other):
-        other.connect(self)
-
     def activate_me(self, dst_node):
         raise Exception
 
@@ -39,15 +36,15 @@ class Output(Node):
 class Constant(Node):
 
     def __init__(self, value):
-        self.out_nodes = []
+        super().__init__()
         self.value = value
-
-    def activate(self, value, src_node):
-        self._activate(value, src_node)
 
     def _activate(self, value, src_node):
         for node in self.out_nodes:
             node.activate(self.value, self)
+
+    def activate(self, value, src_node):
+        self._activate(value, src_node)
 
     def activate_me(self, dst_node):
         self._activate(self.value, self)
@@ -56,6 +53,7 @@ class Constant(Node):
 class If(Node):
 
     def __init__(self, operator):
+        super().__init__()
         self.first_in_node = None
         self.second_in_node = None
         self.in_values = {}
@@ -81,15 +79,15 @@ class If(Node):
         self.saved_value = first_value
         if result:
             for node in self.positive_out_nodes:
-                if not hasattr(node, 'saved_value'):
+                if not node.is_activated:
                     node.activate(first_value, self)
         else:
             for node in self.negative_out_nodes:
-                if not hasattr(node, 'saved_value'):
+                if not node.is_activated:
                     node.activate(first_value, self)
 
     def activate_me(self, dst_node):
-        if hasattr(self, 'saved_value'):
+        if self.is_activated:
             dst_node.activate(self.saved_value, self)
         else:
             self.first_in_node.activate_me(self)
@@ -100,10 +98,10 @@ class If(Node):
             self.positive_out_nodes.append(other)
         else:
             self.negative_out_nodes.append(other)
-        if hasattr(other, 'connect'):
-            other.connect(self)
+        super().__rshift__(other)
 
-    def connect(self, other):
+    def add_in(self, other):
+        super().add_in(other)
         if self.first_in_node is None:
             self.first_in_node = other
         elif self.second_in_node is None:
@@ -115,10 +113,9 @@ class If(Node):
 class Operator(Node):
 
     def __init__(self, operator):
-        self.in_nodes = []
+        super().__init__()
         self.in_values = {}
         self.operator = operator
-        self.out_nodes = []
 
     def activate(self, value, src_node):
         self.in_values[src_node] = value
@@ -134,10 +131,7 @@ class Operator(Node):
             node.activate(result, self)
 
     def activate_me(self, dst_node):
-        if hasattr(self, 'saved_value'):
+        if self.is_activated:
             dst_node.activate(self.saved_value, self)
         else:
             self.in_nodes[0].activate_me(self)
-
-    def connect(self, other):
-        self.in_nodes.append(other)
