@@ -1,8 +1,6 @@
 #!/usr/bin/env python3
 import operator
 
-import graphviz
-
 from gravis import *
 
 
@@ -26,12 +24,20 @@ sub2 >> plus
 plus >> Output()
 
 
+def render(digraph):
+    try:
+        import graphviz
+    except ImportError:
+        print(digraph)
+    else:
+        dot = graphviz.Source(digraph)
+        dot.render(view=True)
+
+
 def main(input_value):
     with DebugContext() as debug:
         input.activate(input_value, None)
-        digraph = debug.create_digraph()
-        dot = graphviz.Source(digraph)
-        dot.render(view=True)
+        render(debug.create_digraph())
 
 
 if __name__ == '__main__':

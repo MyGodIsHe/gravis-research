@@ -1,4 +1,5 @@
 import functools
+from collections import defaultdict
 from contextlib import ContextDecorator
 from enum import Enum
 from io import StringIO
@@ -11,7 +12,7 @@ __all__ = (
 
 
 class Direction(Enum):
-    back = False
+    backward = False
     forward = True
 
 
@@ -57,7 +58,7 @@ class Iteration(NamedTuple):
 
     @property
     def style(self):
-        return 'solid' if self.direction.value else 'dotted'
+        return 'solid' if self.direction == Direction.forward else 'dotted'
 
     @property
     def label_args(self):
@@ -97,14 +98,33 @@ class DebugContext(ContextDecorator):
             stream.write(iteration.render(step + 1))
 
         nodes = set()
-        for iteration in self.iterations:
-            if iteration.src.label == 'None':
-                continue
+        for iteration in self.iterations[1:]:
             nodes.add(iteration.src)
             nodes.add(iteration.dst)
 
         for node in nodes:
             stream.write('\t"{}" [label="{}"];\n'.format(node.id, node.label))
+
+        forwards = defaultdict(list)
+        for iteration in self.iterations[1:]:
+            if iteration.direction == Direction.forward:
+                forwards[iteration.src].append(iteration.dst)
+
+        rank = defaultdict(list)
+        for n, node in enumerate(nodes):
+            level = get_level(node, forwards)  # TODO: optimize
+            rank[level].append(node)
+
+        for nodes in rank.values():
+            if len(nodes) > 1:
+                stream.write(
+                    '\t{{rank=same {}}}\n'.format(
+                        ' '.join(
+                            '"{}"'.format(node.id)
+                            for node in nodes
+                        )
+                    )
+                )
 
         stream.write('}\n')
         return stream.getvalue()
@@ -119,6 +139,15 @@ class DebugContext(ContextDecorator):
     @classmethod
     def current(cls):
         return cls.STACK[-1] if cls.STACK else None
+
+
+def get_level(node, forwards):
+    if not forwards:
+        return 0
+    levels = [0]
+    for node in forwards[node]:
+        levels.append(get_level(node, forwards))
+    return 1 + max(levels)
 
 
 def method_logger(func):
