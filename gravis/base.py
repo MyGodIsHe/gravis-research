@@ -1,3 +1,4 @@
+import abc
 import functools
 from collections import defaultdict
 from contextlib import ContextDecorator
@@ -178,13 +179,34 @@ class NodeMeta(type):
 
 
 class Node(metaclass=NodeMeta):
-    out_nodes: list
-    saved_value: Any
+    VALUE_NONE = object()
+
+    def __init__(self):
+        self.in_nodes = []
+        self.out_nodes = []
+        self.saved_value = self.VALUE_NONE
 
     def __repr__(self):
         return self.__class__.__name__
 
-    def __rshift__(self, other):
+    def __rshift__(self, other: 'Node'):
+        self.add_out(other)
+        other.add_in(self)
+
+    def add_in(self, other):
+        self.in_nodes.append(other)
+
+    def add_out(self, other):
         self.out_nodes.append(other)
-        if hasattr(other, 'connect'):
-            other.connect(self)
+
+    @property
+    def is_activated(self):
+        return self.saved_value != self.VALUE_NONE
+
+    @abc.abstractmethod
+    def activate(self, value, src_node):
+        pass
+
+    @abc.abstractmethod
+    def activate_me(self, dst_node):
+        pass
