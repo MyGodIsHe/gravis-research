@@ -27,9 +27,8 @@ plus >> Output()
 
 
 def main(input_value):
-    fib = Subspace(input)
     with DebugContext() as debug:
-        fib.in_nodes[0].activate(input_value, None)
+        input.activate(input_value, None)
         digraph = debug.create_digraph()
         dot = graphviz.Source(digraph)
         dot.render(view=True)

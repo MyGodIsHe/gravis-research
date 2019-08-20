@@ -19,17 +19,27 @@ class NodeName(NamedTuple):
     label: str
     id: str
 
+    OPERATOR_MAP = {
+        'le': '<=',
+        'add': '+',
+        'sub': '-',
+    }
+
+    @staticmethod
+    def resolve_operator(value):
+        return NodeName.OPERATOR_MAP.get(value, value)
+
     @staticmethod
     def create(node: 'Node') -> 'NodeName':
         from . import nodes
 
         if isinstance(node, Node):
             if isinstance(node, nodes.Constant):
-                label = '{}({})'.format(node, node.value)
+                label = str(node.value)
             elif isinstance(node, nodes.If):
-                label = '{}({})'.format(node, node.operator.__name__)
+                label = NodeName.resolve_operator(node.operator.__name__)
             elif isinstance(node, nodes.Operator):
-                label = '{}({})'.format(node, node.operator.__name__)
+                label = NodeName.resolve_operator(node.operator.__name__)
             else:
                 label = repr(node)
         else:
