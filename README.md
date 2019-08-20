@@ -4,4 +4,4 @@ See examples.
 
 # now
 
-![current state](https://github.com/MyGodIsHe/gravis/raw/master/now.svg)
+![current state](./now.svg?sanitize=true)
