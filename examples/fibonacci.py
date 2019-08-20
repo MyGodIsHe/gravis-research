@@ -31,7 +31,7 @@ def render(digraph):
         print(digraph)
     else:
         dot = graphviz.Source(digraph)
-        dot.render(view=True)
+        dot.render(view=True, format='svg')
 
 
 def main(input_value):
