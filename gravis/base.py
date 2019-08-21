@@ -73,6 +73,10 @@ class Node(metaclass=NodeMeta):
         pass
 
 
+def uuid(node):
+    return hex(id(node))[2:]
+
+
 class Direction(Enum):
     backward = False
     forward = True
@@ -106,8 +110,7 @@ class NodeName(NamedTuple):
         else:
             label = repr(node)
 
-        uuid = hex(id(node))[2:]
-        return NodeName(label=label, id=uuid, node=node)
+        return NodeName(label=label, id=uuid(node), node=node)
 
 
 class Iteration(NamedTuple):
@@ -154,7 +157,13 @@ class DebugContext(ContextDecorator):
         stream = StringIO()
         stream.write('digraph {\n')
 
-        all_links, all_nodes = collect_links(self.iterations[0].dst.node)
+        for step, iteration in enumerate(self.iterations[1:]):
+            stream.write(iteration.render(step + 1))
+
+        start_node = self.iterations[0].dst.node
+        all_links, all_nodes = collect_links(start_node)
+        level_map = defaultdict(set)
+        collect_levels(start_node, level_map)
         activated_links = {
             (
                 (iteration.src.node, iteration.dst.node)
@@ -178,9 +187,6 @@ class DebugContext(ContextDecorator):
                 )
             ))
 
-        for step, iteration in enumerate(self.iterations[1:]):
-            stream.write(iteration.render(step + 1))
-
         nodes = set()
         for iteration in self.iterations[1:]:
             nodes.add(iteration.src)
@@ -192,22 +198,12 @@ class DebugContext(ContextDecorator):
         for node in nodes:
             stream.write('\t"{}" [label="{}"];\n'.format(node.id, node.label))
 
-        forwards = defaultdict(list)
-        for iteration in self.iterations[1:]:
-            if iteration.direction == Direction.forward:
-                forwards[iteration.src].append(iteration.dst)
-
-        rank = defaultdict(list)
-        for n, node in enumerate(nodes):
-            level = get_level(node, forwards)  # TODO: optimize
-            rank[level].append(node)
-
-        for nodes in rank.values():
+        for nodes in level_map.values():
             if len(nodes) > 1:
                 stream.write(
                     '\t{{rank=same {}}}\n'.format(
                         ' '.join(
-                            '"{}"'.format(node.id)
+                            '"{}"'.format(uuid(node))
                             for node in nodes
                         )
                     )
@@ -228,15 +224,6 @@ class DebugContext(ContextDecorator):
         return cls.STACK[-1] if cls.STACK else None
 
 
-def get_level(node, forwards):
-    if not forwards:
-        return 0
-    levels = [0]
-    for node in forwards[node]:
-        levels.append(get_level(node, forwards))
-    return 1 + max(levels)
-
-
 def collect_links(start_node: Node):
     pass_nodes = set()
     links = set()
@@ -254,3 +241,13 @@ def collect_links(start_node: Node):
                 links.add((other, current))
 
     return links, pass_nodes
+
+
+def collect_levels(node: Node, level_map, level=0):
+    if node in level_map[level]:
+        return
+    level_map[level].add(node)
+    for obj in node.out_nodes:
+        collect_levels(obj, level_map, level + 1)
+    for obj in node.in_nodes:
+        collect_levels(obj, level_map, level - 1)
