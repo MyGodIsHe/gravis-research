@@ -3,5 +3,6 @@
 See examples.
 
 # now
-
-![current state](./now.svg?sanitize=true)
+| now | target |
+|---|---|
+| ![current state](./now.svg?sanitize=true) | ![target](./target.svg?sanitize=true) |
