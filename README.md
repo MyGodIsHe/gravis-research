@@ -3,6 +3,6 @@
 See examples.
 
 # progress
-| now | target |
+| now(profiler) | target |
 |---|---|
 | ![current state](./now.svg?sanitize=true) | ![target](./target.svg?sanitize=true) |
