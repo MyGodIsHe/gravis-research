@@ -2,7 +2,7 @@
 
 See examples.
 
-# now
+# progress
 | now | target |
 |---|---|
 | ![current state](./now.svg?sanitize=true) | ![target](./target.svg?sanitize=true) |
