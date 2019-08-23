@@ -3,6 +3,6 @@
 See examples.
 
 # progress
-| now (profiler) | target (fibonacci) |
+| now (some graph profiler) | target (fibonacci) |
 |---|---|
 | ![current state](./now.svg?sanitize=true) | ![target](./target.svg?sanitize=true) |
