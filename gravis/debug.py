@@ -5,7 +5,8 @@ from io import StringIO
 from typing import NamedTuple, List, Tuple
 
 from .base import Node
-from . import events, nodes
+from .nodes import *
+from . import events
 
 __all__ = (
     'DebugContext',
@@ -40,7 +41,7 @@ def log_backward(self, *args):
         ))
 
 
-def uuid(node):
+def get_uuid(node):
     return hex(id(node))[2:]
 
 
@@ -78,20 +79,24 @@ class NodeName(NamedTuple):
 
     @staticmethod
     def create(node: Node) -> 'NodeName':
-        if isinstance(node, nodes.Input):
+        if isinstance(node, Input):
             label = 'I'
-        elif isinstance(node, nodes.Output):
+        elif isinstance(node, Output):
             label = 'O'
-        elif isinstance(node, nodes.Constant):
+        elif isinstance(node, Constant):
             label = str(node.value)
-        elif isinstance(node, nodes.If):
+        elif isinstance(node, If):
             label = NodeName.resolve_operator(node.operator.__name__)
-        elif isinstance(node, nodes.Operator):
+        elif isinstance(node, Operator):
             label = NodeName.resolve_operator(node.operator.__name__)
         else:
             label = repr(node)
 
-        return NodeName(label=label, id=uuid(node), node=node)
+        return NodeName(
+            label=label,
+            id=get_uuid(node),
+            node=node,
+        )
 
 
 class Iteration(NamedTuple):
@@ -128,14 +133,114 @@ class Iteration(NamedTuple):
         )
 
 
+def around_generator(items: List[Iteration]):
+    items = iter(items)
+    past = None
+    current = next(items, None)
+    future = next(items, None)
+    while current:
+        yield past, current, future
+        past = current
+        current = future
+        future = next(items, None)
+
+
+def subspace_bridge(past: Iteration, current: Iteration, future: Iteration):
+    if current.direction == Direction.forward:
+        if isinstance(current.dst.node, Subspace):
+            return Iteration(
+                src=current.src,
+                dst=future.dst,
+                args=current.args,
+                direction=current.direction,
+            )
+        if isinstance(current.src.node, Subspace):
+            return Iteration(
+                src=past.dst,
+                dst=current.dst,
+                args=current.args,
+                direction=current.direction,
+            )
+
+
 def filter_iterations(iterations: List[Iteration]):
-    return [
-        iteration
-        for iteration in iterations
-        if not (
-            iteration.src.node is None
-        )
-    ]
+    filtered = []
+    for past, current, future in around_generator(iterations):
+        if current.src.node is None:
+            continue
+        if current.direction == Direction.forward:
+            if isinstance(current.dst.node, Subspace):
+                continue
+            if isinstance(current.src.node, Subspace):
+                continue
+            if (
+                    isinstance(current.dst.node, Output) and
+                    future and isinstance(future.src.node, Subspace)
+            ):
+                filtered.append(current)
+                filtered.append(Iteration(
+                    src=current.dst,
+                    dst=future.dst,
+                    args=current.args,
+                    direction=Direction.forward,
+                ))
+                continue
+        else:
+            if isinstance(current.dst.node, Subspace):
+                filtered.append(Iteration(
+                    src=current.src,
+                    dst=future.dst,
+                    args=current.args,
+                    direction=Direction.backward,
+                ))
+                continue
+            if isinstance(current.src.node, Subspace):
+                continue
+        filtered.append(current)
+
+    return filtered
+
+
+def collect_links(start_node: Node):
+    pass_nodes = set()
+    links = set()
+    coming_nodes = {start_node}
+
+    while coming_nodes:
+        current = coming_nodes.pop()
+        pass_nodes.add(current)
+        linked_nodes = set(current.in_nodes + current.out_nodes) - pass_nodes
+        coming_nodes |= linked_nodes
+        if isinstance(current, Subspace):
+            continue
+        for other in linked_nodes:
+            if isinstance(other, Subspace):
+                continue
+            if id(current) > id(other):
+                links.add((current, other))
+            else:
+                links.add((other, current))
+
+    return links, pass_nodes
+
+
+def collect_levels(node: Node, level_map, level=0):
+    if node in level_map[level]:
+        return
+    level_map[level].add(node)
+    for obj in node.out_nodes:
+        collect_levels(obj, level_map, level + 1)
+    for obj in node.in_nodes:
+        collect_levels(obj, level_map, level - 1)
+
+
+def get_subspace_map(node_names):
+    subspace_map = defaultdict(set)
+    for node_name in node_names:
+        if node_name.node.subspace:
+            subspace_map[node_name.node.subspace].add(node_name.node)
+
+    return subspace_map
 
 
 class DebugContext(ContextDecorator):
@@ -155,7 +260,7 @@ class DebugContext(ContextDecorator):
                 stream.write(iteration.render(step + 1))
 
             start_node = iterations[0].src.node
-            all_links = collect_links(start_node)
+            all_links, all_nodes = collect_links(start_node)
             level_map = defaultdict(set)
             #collect_levels(start_node, level_map)
             activated_links = {
@@ -167,19 +272,10 @@ class DebugContext(ContextDecorator):
                 for iteration in iterations
             }
             pass_links = all_links - activated_links
-
             pass_links = {
                 (NodeName.create(src), NodeName.create(dst))
                 for src, dst in pass_links
             }
-            for src, dst in pass_links:
-                stream.write((
-                    '\t"{src}" -> "{dst}" [arrowhead=none];'
-                    '\n'.format(
-                        src=src.id,
-                        dst=dst.id,
-                    )
-                ))
 
             all_node_names = set()
             for iteration in iterations:
@@ -188,6 +284,15 @@ class DebugContext(ContextDecorator):
             for src, dst in pass_links:
                 all_node_names.add(src)
                 all_node_names.add(dst)
+
+            for src, dst in pass_links:
+                stream.write((
+                    '\t"{src}" -> "{dst}" [arrowhead=none];'
+                    '\n'.format(
+                        src=src.id,
+                        dst=dst.id,
+                    )
+                ))
 
             for node_name in all_node_names:
                 stream.write(
@@ -198,12 +303,20 @@ class DebugContext(ContextDecorator):
                     )
                 )
 
+            for subspace, own_nodes in get_subspace_map(all_node_names).items():
+                stream.write(
+                    '\tsubgraph cluster_{} {{\n'.format(get_uuid(subspace))
+                )
+                for node in own_nodes:
+                    stream.write('\t\t"{}";\n'.format(get_uuid(node)))
+                stream.write('\t}\n')
+
             for level_nodes in level_map.values():
                 if len(level_nodes) > 1:
                     stream.write(
                         '\t{{rank=same {}}}\n'.format(
                             ' '.join(
-                                '"{}"'.format(uuid(node))
+                                '"{}"'.format(get_uuid(node))
                                 for node in level_nodes
                             )
                         )
@@ -222,34 +335,3 @@ class DebugContext(ContextDecorator):
     @classmethod
     def current(cls) -> 'DebugContext':
         return cls.STACK[-1] if cls.STACK else None
-
-
-def collect_links(start_node: Node):
-    pass_nodes = set()
-    links = set()
-    coming_nodes = {start_node}
-
-    while coming_nodes:
-        current = coming_nodes.pop()
-        pass_nodes.add(current)
-        linked_nodes = set(current.in_nodes + current.out_nodes) - pass_nodes
-        coming_nodes |= linked_nodes
-        for other in linked_nodes:
-            if id(current) > id(other):
-                links.add((current, other))
-            else:
-                links.add((other, current))
-
-    return links
-
-
-def collect_levels(node: Node, level_map, level=0):
-    if abs(level) > 10:
-        return
-    if node in level_map[level]:
-        return
-    level_map[level].add(node)
-    for obj in node.out_nodes:
-        collect_levels(obj, level_map, level + 1)
-    for obj in node.in_nodes:
-        collect_levels(obj, level_map, level - 1)

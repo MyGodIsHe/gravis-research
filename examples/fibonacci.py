@@ -41,11 +41,11 @@ def main(input_value):
         plus >> output
 
     with DebugContext() as debug:
-        result = input.activate(input_value, None)
-        print('Result:', result)
+        input.activate(input_value, None)
+        print('Result:', output.saved_value)
         digraph = debug.create_digraph()
         render(digraph)
 
 
 if __name__ == '__main__':
-    main(3)
+    main(4)
