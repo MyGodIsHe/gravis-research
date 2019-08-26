@@ -1,3 +1,6 @@
+from contextlib import ContextDecorator
+
+from . import events
 from .base import Node
 
 __all__ = (
@@ -148,14 +151,81 @@ class Operator(Node):
             self.in_nodes[0].activate_me(self)
 
 
-class Subspace(Node):
+class Subspace(ContextDecorator, Node):
+    STACK = []
 
     def __init__(self):
         super().__init__()
-        self.nodes = nodes
+        self.inits = {}
+        self.connects = []
 
     def activate(self, value, src_node):
-        pass
+        """
+        clone self and activate input
+        """
+        input: Input = None
+        output: Output = None
+        instance_map = {
+            self: self,
+        }  # original to new
+
+        for self_node, other_args in self.connects:
+            # TODO: need redesign branching
+            if isinstance(other_args, tuple):
+                other_node = other_args[1]
+            else:
+                other_node = other_args
+
+            # map original instance to new instance
+            for node in [self_node, other_node]:
+                if node not in instance_map:
+                    args, kwargs = self.inits[node]
+                    new_node = node.__class__(*args, **kwargs)
+                    instance_map[node] = new_node
+                    if isinstance(new_node, Input):
+                        input = new_node
+                    elif isinstance(new_node, Output):
+                        output = new_node
+
+            self_node = instance_map[self_node]
+            if isinstance(other_args, tuple):
+                other_node = other_args[0], instance_map[other_node]
+            else:
+                other_node = instance_map[other_node]
+
+            # create new connect
+            self_node >> other_node
+
+        input.activate(value, src_node)
+        for node in self.out_nodes:
+            node.activate(output.saved_value, self)
 
     def activate_me(self, dst_node):
-        pass
+        raise Exception()
+
+    def __enter__(self):
+        self.STACK.append(self)
+        return self
+
+    def __exit__(self, *exc):
+        self.STACK.pop()
+
+    @classmethod
+    def current(cls) -> 'Subspace':
+        return cls.STACK[-1] if cls.STACK else None
+
+
+@events.event_init
+def subspace_init(self, *args, **kwargs):
+    subspace = Subspace.current()
+    if subspace and self not in subspace.inits:
+        subspace.inits[self] = (args, kwargs)
+
+
+@events.event_connect
+def subspace_connect(self, other):
+    subspace = Subspace.current()
+    if subspace:
+        if isinstance(self, If) and not isinstance(other, tuple):
+            return
+        subspace.connects.append((self, other))
