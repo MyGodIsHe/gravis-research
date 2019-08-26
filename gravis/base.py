@@ -1,4 +1,5 @@
 import abc
+from typing import Optional, List
 
 from . import events
 
@@ -19,10 +20,11 @@ class NodeMeta(type):
 class Node(metaclass=NodeMeta):
     VALUE_NONE = object()
 
-    def __init__(self):
-        self.in_nodes = []
-        self.out_nodes = []
+    def __init__(self, subspace=None):
+        self.in_nodes: List['Node'] = []
+        self.out_nodes: List['Node'] = []
         self.saved_value = self.VALUE_NONE
+        self.subspace: Optional['Node'] = subspace
 
     def __repr__(self):
         return self.__class__.__name__

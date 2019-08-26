@@ -25,7 +25,6 @@ class Input(Node):
 
     def activate(self, value, src_node):
         self._activate(value)
-        return self.saved_value
 
     def activate_me(self, dst_node):
         self._activate(self.saved_value)
@@ -179,6 +178,7 @@ class Subspace(ContextDecorator, Node):
                 if node not in instance_map:
                     args, kwargs = self.parent.inits[node]
                     new_node = node.__class__(*args, **kwargs)
+                    new_node.subspace = self
                     instance_map[node] = new_node
 
             self_node = instance_map[self_node]
@@ -203,13 +203,10 @@ class Subspace(ContextDecorator, Node):
             node.activate(self.saved_value, self)
 
     def activate_me(self, dst_node):
-        if self.is_activated:
-            dst_node.activate(self.saved_value, self)
-        else:
-            for node in self.in_nodes:
-                if not node.is_activated:
-                    node.activate_me(self)
-                    break
+        for node in self.in_nodes:
+            if not node.is_activated:
+                node.activate_me(self)
+                break
 
     def __enter__(self):
         self.STACK.append(self)
