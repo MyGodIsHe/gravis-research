@@ -128,6 +128,16 @@ class Iteration(NamedTuple):
         )
 
 
+def filter_iterations(iterations: List[Iteration]):
+    return [
+        iteration
+        for iteration in iterations
+        if not (
+            iteration.src.node is None
+        )
+    ]
+
+
 class DebugContext(ContextDecorator):
     STACK = []
 
@@ -139,12 +149,13 @@ class DebugContext(ContextDecorator):
         stream.write('digraph {\n')
 
         if self.iterations:
+            iterations = filter_iterations(self.iterations)
 
-            for step, iteration in enumerate(self.iterations[1:]):
+            for step, iteration in enumerate(iterations):
                 stream.write(iteration.render(step + 1))
 
-            start_node = self.iterations[0].dst.node
-            all_links, all_nodes = collect_links(start_node)
+            start_node = iterations[0].src.node
+            all_links = collect_links(start_node)
             level_map = defaultdict(set)
             #collect_levels(start_node, level_map)
             activated_links = {
@@ -153,7 +164,7 @@ class DebugContext(ContextDecorator):
                     if id(iteration.src.node) > id(iteration.dst.node)
                     else (iteration.dst.node, iteration.src.node)
                 )
-                for iteration in self.iterations[1:]
+                for iteration in iterations
             }
             pass_links = all_links - activated_links
 
@@ -170,30 +181,30 @@ class DebugContext(ContextDecorator):
                     )
                 ))
 
-            nodes = set()
-            for iteration in self.iterations[1:]:
-                nodes.add(iteration.src)
-                nodes.add(iteration.dst)
+            all_node_names = set()
+            for iteration in iterations:
+                all_node_names.add(iteration.src)
+                all_node_names.add(iteration.dst)
             for src, dst in pass_links:
-                nodes.add(src)
-                nodes.add(dst)
+                all_node_names.add(src)
+                all_node_names.add(dst)
 
-            for node in nodes:
+            for node_name in all_node_names:
                 stream.write(
                     '\t"{}" [label="{}";shape={}];\n'.format(
-                        node.id,
-                        node.label,
-                        node.shape,
+                        node_name.id,
+                        node_name.label,
+                        node_name.shape,
                     )
                 )
 
-            for nodes in level_map.values():
-                if len(nodes) > 1:
+            for level_nodes in level_map.values():
+                if len(level_nodes) > 1:
                     stream.write(
                         '\t{{rank=same {}}}\n'.format(
                             ' '.join(
                                 '"{}"'.format(uuid(node))
-                                for node in nodes
+                                for node in level_nodes
                             )
                         )
                     )
@@ -229,10 +240,12 @@ def collect_links(start_node: Node):
             else:
                 links.add((other, current))
 
-    return links, pass_nodes
+    return links
 
 
 def collect_levels(node: Node, level_map, level=0):
+    if abs(level) > 10:
+        return
     if node in level_map[level]:
         return
     level_map[level].add(node)
