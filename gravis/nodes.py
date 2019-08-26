@@ -6,6 +6,7 @@ __all__ = (
     'Constant',
     'If',
     'Operator',
+    'Subspace',
     'branch_true',
     'branch_false',
 )
@@ -145,3 +146,16 @@ class Operator(Node):
             dst_node.activate(self.saved_value, self)
         else:
             self.in_nodes[0].activate_me(self)
+
+
+class Subspace(Node):
+
+    def __init__(self):
+        super().__init__()
+        self.nodes = nodes
+
+    def activate(self, value, src_node):
+        pass
+
+    def activate_me(self, dst_node):
+        pass
