@@ -1,4 +1,5 @@
 from contextlib import ContextDecorator
+from typing import Optional
 
 from . import events
 from .base import Node
@@ -17,23 +18,23 @@ __all__ = (
 
 class Input(Node):
 
-    def _activate(self, value, src_node):
+    def _activate(self, value):
         self.saved_value = value
         for node in self.out_nodes:
             node.activate(value, self)
 
     def activate(self, value, src_node):
-        self._activate(value, src_node)
+        self._activate(value)
+        return self.saved_value
 
     def activate_me(self, dst_node):
-        self._activate(self.saved_value, self)
+        self._activate(self.saved_value)
 
 
 class Output(Node):
 
     def activate(self, value, src_node):
         self.saved_value = value
-        print(value)
 
     def activate_me(self, dst_node):
         raise Exception
@@ -45,15 +46,15 @@ class Constant(Node):
         super().__init__()
         self.value = value
 
-    def _activate(self, value, src_node):
+    def _activate(self):
         for node in self.out_nodes:
             node.activate(self.value, self)
 
     def activate(self, value, src_node):
-        self._activate(value, src_node)
+        self._activate()
 
     def activate_me(self, dst_node):
-        self._activate(self.value, self)
+        self._activate()
 
 
 class If(Node):
@@ -154,22 +155,19 @@ class Operator(Node):
 class Subspace(ContextDecorator, Node):
     STACK = []
 
-    def __init__(self):
+    def __init__(self, parent=None):
         super().__init__()
+        self.parent = parent
         self.inits = {}
         self.connects = []
+        self.input: Optional[Input] = None
+        self.output: Optional[Output] = None
+        self.is_generated = False
 
-    def activate(self, value, src_node):
-        """
-        clone self and activate input
-        """
-        input: Input = None
-        output: Output = None
-        instance_map = {
-            self: self,
-        }  # original to new
+    def _generate(self):
+        instance_map = {}  # original to new
 
-        for self_node, other_args in self.connects:
+        for self_node, other_args in self.parent.connects:
             # TODO: need redesign branching
             if isinstance(other_args, tuple):
                 other_node = other_args[1]
@@ -179,13 +177,9 @@ class Subspace(ContextDecorator, Node):
             # map original instance to new instance
             for node in [self_node, other_node]:
                 if node not in instance_map:
-                    args, kwargs = self.inits[node]
+                    args, kwargs = self.parent.inits[node]
                     new_node = node.__class__(*args, **kwargs)
                     instance_map[node] = new_node
-                    if isinstance(new_node, Input):
-                        input = new_node
-                    elif isinstance(new_node, Output):
-                        output = new_node
 
             self_node = instance_map[self_node]
             if isinstance(other_args, tuple):
@@ -196,18 +190,33 @@ class Subspace(ContextDecorator, Node):
             # create new connect
             self_node >> other_node
 
-        input.activate(value, src_node)
+    def activate(self, value, src_node):
+        """
+        clone self and activate input
+        """
+        if not self.is_generated:
+            with self:
+                self._generate()
+        self.input.activate(value, src_node)
+        self.saved_value = self.output.saved_value
         for node in self.out_nodes:
-            node.activate(output.saved_value, self)
+            node.activate(self.saved_value, self)
 
     def activate_me(self, dst_node):
-        raise Exception()
+        if self.is_activated:
+            dst_node.activate(self.saved_value, self)
+        else:
+            for node in self.in_nodes:
+                if not node.is_activated:
+                    node.activate_me(self)
+                    break
 
     def __enter__(self):
         self.STACK.append(self)
         return self
 
     def __exit__(self, *exc):
+        self.is_generated = True
         self.STACK.pop()
 
     @classmethod
@@ -220,6 +229,10 @@ def subspace_init(self, *args, **kwargs):
     subspace = Subspace.current()
     if subspace and self not in subspace.inits:
         subspace.inits[self] = (args, kwargs)
+        if isinstance(self, Input):
+            subspace.input = self
+        elif isinstance(self, Output):
+            subspace.output = self
 
 
 @events.event_connect

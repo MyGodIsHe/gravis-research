@@ -4,8 +4,6 @@ import operator
 from gravis import *
 
 
-
-
 def render(digraph):
     try:
         import graphviz
@@ -17,33 +15,37 @@ def render(digraph):
 
 
 def main(input_value):
-    with Subspace() as fibonacci:
+    with Subspace() as self:
+        input = Input()
         if_le = If(operator.le)
-        sub1 = Operator(operator.sub)
-        sub2 = Operator(operator.sub)
+        sub_left = Operator(operator.sub)
+        sub_right = Operator(operator.sub)
         plus = Operator(operator.add)
         const1 = Constant(1)
         output = Output()
+        self_left = Subspace(self)
+        self_right = Subspace(self)
 
-        Input() >> if_le
+        input >> if_le
         Constant(2) >> if_le
         if_le >> branch_true(const1)
         const1 >> output
-        if_le >> branch_false(sub1)
-        Constant(1) >> sub1
-        sub1 >> fibonacci
-        fibonacci >> plus
-        if_le >> branch_false(sub2)
-        Constant(2) >> sub2
-        sub2 >> fibonacci
-        fibonacci >> plus
+        if_le >> branch_false(sub_left)
+        Constant(1) >> sub_left
+        sub_left >> self_left
+        self_left >> plus
+        if_le >> branch_false(sub_right)
+        Constant(2) >> sub_right
+        sub_right >> self_right
+        self_right >> plus
         plus >> output
 
     with DebugContext() as debug:
-        fibonacci.activate(input_value, None)
+        result = input.activate(input_value, None)
+        print('Result:', result)
         digraph = debug.create_digraph()
         render(digraph)
 
 
 if __name__ == '__main__':
-    main(2)
+    main(3)
