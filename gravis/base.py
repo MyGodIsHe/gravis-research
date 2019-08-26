@@ -10,7 +10,7 @@ __all__ = (
 class NodeMeta(type):
 
     def __new__(mcs, name, bases, namespace):
-        for method in ['activate', 'activate_me']:
+        for method in events.EVENT_METHODS:
             if method in namespace:
                 namespace[method] = events.event_wrapper(namespace[method])
         return super().__new__(mcs, name, bases, namespace)

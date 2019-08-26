@@ -70,7 +70,7 @@ class NodeName(NamedTuple):
 
     @property
     def shape(self):
-        return self.SHAPE_MAP.get(repr(self.node), '')
+        return self.SHAPE_MAP.get(repr(self.node), 'box')
 
     @staticmethod
     def resolve_operator(value):
@@ -146,7 +146,7 @@ class DebugContext(ContextDecorator):
             start_node = self.iterations[0].dst.node
             all_links, all_nodes = collect_links(start_node)
             level_map = defaultdict(set)
-            collect_levels(start_node, level_map)
+            #collect_levels(start_node, level_map)
             activated_links = {
                 (
                     (iteration.src.node, iteration.dst.node)
@@ -209,7 +209,7 @@ class DebugContext(ContextDecorator):
         self.STACK.pop()
 
     @classmethod
-    def current(cls):
+    def current(cls) -> 'DebugContext':
         return cls.STACK[-1] if cls.STACK else None
 
 
