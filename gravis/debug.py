@@ -41,8 +41,10 @@ def log_backward(self, *args):
         ))
 
 
-def get_uuid(node):
-    return hex(id(node))[2:]
+def get_uuid(node, prefix=None):
+    if not prefix:
+        prefix = repr(node).lower()
+    return '{}_{}'.format(prefix, hex(id(node))[2:])
 
 
 class Direction(Enum):
@@ -122,7 +124,7 @@ class Iteration(NamedTuple):
         else:
             label = '[{}]'.format(step)
         return (
-            '\t"{src}" -> "{dst}" '
+            '\t{src} -> {dst} '
             '[label="{label}";style={style}];'
             '\n'.format(
                 src=self.src.id,
@@ -287,7 +289,7 @@ class DebugContext(ContextDecorator):
 
             for src, dst in pass_links:
                 stream.write((
-                    '\t"{src}" -> "{dst}" [arrowhead=none];'
+                    '\t{src} -> {dst} [arrowhead=none];'
                     '\n'.format(
                         src=src.id,
                         dst=dst.id,
@@ -296,7 +298,7 @@ class DebugContext(ContextDecorator):
 
             for node_name in all_node_names:
                 stream.write(
-                    '\t"{}" [label="{}";shape={}];\n'.format(
+                    '\t{} [label="{}";shape={}];\n'.format(
                         node_name.id,
                         node_name.label,
                         node_name.shape,
@@ -305,10 +307,10 @@ class DebugContext(ContextDecorator):
 
             for subspace, own_nodes in get_subspace_map(all_node_names).items():
                 stream.write(
-                    '\tsubgraph cluster_{} {{\n'.format(get_uuid(subspace))
+                    '\tsubgraph {} {{\n'.format(get_uuid(subspace, 'cluster'))
                 )
                 for node in own_nodes:
-                    stream.write('\t\t"{}";\n'.format(get_uuid(node)))
+                    stream.write('\t\t{};\n'.format(get_uuid(node)))
                 stream.write('\t}\n')
 
             for level_nodes in level_map.values():
@@ -316,7 +318,7 @@ class DebugContext(ContextDecorator):
                     stream.write(
                         '\t{{rank=same {}}}\n'.format(
                             ' '.join(
-                                '"{}"'.format(get_uuid(node))
+                                '{}'.format(get_uuid(node))
                                 for node in level_nodes
                             )
                         )
