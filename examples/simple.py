@@ -10,18 +10,19 @@ sub1 = Operator(operator.sub)
 sub2 = Operator(operator.sub)
 plus = Operator(operator.add)
 const1 = Constant(1)
+output = Output()
 
 input >> if_le
 Constant(1) >> if_le
 if_le >> branch_true(const1)
-const1 >> Output()
+const1 >> output
 if_le >> branch_false(sub1)
 Constant(1) >> sub1
 sub1 >> plus
 if_le >> branch_false(sub2)
 Constant(2) >> sub2
 sub2 >> plus
-plus >> Output()
+plus >> output
 
 
 def render(digraph):
@@ -37,6 +38,7 @@ def render(digraph):
 def main(input_value):
     with DebugContext() as debug:
         input.activate(input_value, None)
+        print('Result:', output.saved_value)
         digraph = debug.create_digraph()
         render(digraph)
 
