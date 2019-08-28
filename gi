@@ -1,5 +1,6 @@
 #!/usr/bin/env python
 import argparse
+import sys
 
 import gravis
 
@@ -40,7 +41,17 @@ def profiling_render(digraph):
 
 with open(args.file) as f:
     with gravis.Subspace() as main:
-        inputs = gravis.parse(f)
+        try:
+            inputs = gravis.Parser().parse(f)
+        except gravis.ParseException as exc:
+            print(exc)
+            sys.exit(1)
+    if not main.input:
+        print('Error: need input node')
+        sys.exit(1)
+    if not main.output:
+        print('Error: need output node')
+        sys.exit(1)
     if args.profiling:
         with gravis.DebugContext() as debug:
             main.activate(parse_arg(args.argument), None)
