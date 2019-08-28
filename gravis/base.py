@@ -26,7 +26,7 @@ class Node(metaclass=NodeMeta):
         self.saved_value = self.VALUE_NONE
         self.subspace: Optional['Node'] = subspace
 
-    def __repr__(self):
+    def __str__(self):
         return self.__class__.__name__
 
     def __rshift__(self, other: 'Node'):

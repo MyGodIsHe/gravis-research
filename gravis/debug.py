@@ -43,7 +43,7 @@ def log_backward(self, *args):
 
 def get_uuid(node, prefix=None):
     if not prefix:
-        prefix = repr(node).lower()
+        prefix = str(node).lower()
     return '{}_{}'.format(prefix, hex(id(node))[2:])
 
 
@@ -73,7 +73,7 @@ class NodeName(NamedTuple):
 
     @property
     def shape(self):
-        return self.SHAPE_MAP.get(repr(self.node), 'box')
+        return self.SHAPE_MAP.get(str(self.node), 'box')
 
     @staticmethod
     def resolve_operator(value):
@@ -92,7 +92,7 @@ class NodeName(NamedTuple):
         elif isinstance(node, Operator):
             label = NodeName.resolve_operator(node.operator.__name__)
         else:
-            label = repr(node)
+            label = str(node)
 
         return NodeName(
             label=label,
