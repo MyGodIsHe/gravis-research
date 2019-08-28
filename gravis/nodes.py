@@ -11,8 +11,6 @@ __all__ = (
     'If',
     'Operator',
     'Subspace',
-    'branch_true',
-    'branch_false',
 )
 
 
@@ -115,13 +113,23 @@ class If(Node):
         else:
             raise Exception()
 
+    @property
+    def true(self):
+        return IfOut(self, True)
 
-def branch_true(node):
-    return True, node
+    @property
+    def false(self):
+        return IfOut(self, False)
 
 
-def branch_false(node):
-    return False, node
+class IfOut:
+
+    def __init__(self, node: If, branch: bool):
+        self.node = node
+        self.branch = branch
+
+    def __rshift__(self, other):
+        self.node >> (self.branch, other)
 
 
 class Operator(Node):

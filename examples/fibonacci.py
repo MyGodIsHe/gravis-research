@@ -28,13 +28,13 @@ def main(input_value):
 
         input >> if_le
         Constant(2) >> if_le
-        if_le >> branch_true(const1)
+        if_le.true >> const1
         const1 >> output
-        if_le >> branch_false(sub_left)
+        if_le.false >> sub_left
         Constant(1) >> sub_left
         sub_left >> self_left
         self_left >> plus
-        if_le >> branch_false(sub_right)
+        if_le.false >> sub_right
         Constant(2) >> sub_right
         sub_right >> self_right
         self_right >> plus
