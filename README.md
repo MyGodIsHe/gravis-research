@@ -32,7 +32,7 @@
 ### Шаг 3 - интерпретатор
 
 Пример:
-`gi examples/simple.g 5`
+`gi -p examples/simple.g 5`
 
 ## Идеи
 
