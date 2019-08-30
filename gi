@@ -41,11 +41,7 @@ def profiling_render(digraph):
 
 with open(args.file) as f:
     with gravis.Subspace() as main:
-        try:
-            inputs = gravis.Parser().parse(f)
-        except gravis.ParseException as exc:
-            print(exc)
-            sys.exit(1)
+        gravis.parse(f.read())
     if not main.input:
         print('Error: need input node')
         sys.exit(1)
