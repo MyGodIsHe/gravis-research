@@ -131,6 +131,9 @@ class IfOut:
     def __rshift__(self, other):
         self.node >> (self.branch, other)
 
+    def __str__(self):
+        return 'If.{}'.format(self.branch)
+
 
 class Operator(Node):
 
