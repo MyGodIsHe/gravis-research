@@ -4,16 +4,11 @@ using System.Collections.Generic;
 public class Node
 {
     public readonly GameObject gameObject;
-    public HashSet<Node> inputs;
-    public HashSet<Node> outputs;
+    public List<Node> inputs = new List<Node>();
+    public List<Node> outputs = new List<Node>();
     public Vector3 position;
     public string text;
     public NodeType type;
-
-    public Node() {
-        inputs = new HashSet<Node>();
-        outputs = new HashSet<Node>();
-    }
 
     public static List<List<Node>> FindIsolatedGraphs(List<Node> nodes)
     {
@@ -64,6 +59,7 @@ public class Node
 
     public static void AlignNodes(List<Node> nodes)
     {
+        // set levels
         var startNode = GetStartNode(nodes);
         var levels = new Dictionary<Node, int>
         {
@@ -100,21 +96,26 @@ public class Node
             }
             future = newFuture;
         }
-        var group_by_level = new Dictionary<int, HashSet<Node>>();
+
+        // group by level
+        var group_by_level = new SortedDictionary<int, List<Node>>();
         foreach (var pair in levels)
         {
             if (!group_by_level.ContainsKey(pair.Value))
             {
-                group_by_level[pair.Value] = new HashSet<Node>();
+                group_by_level[pair.Value] = new List<Node>();
             }
             group_by_level[pair.Value].Add(pair.Key);
         }
+
+        // set positions
         foreach (var pair in group_by_level)
         {
+            var offset = new Vector3(-pair.Value.Count / 2.0f, 0, 0);
             int i = 0;
             foreach (var node in pair.Value)
             {
-                node.position = new Vector3(i, pair.Key);
+                node.position = new Vector3(i, pair.Key) + offset;
                 i++;
             }
         }
