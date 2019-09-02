@@ -7,6 +7,8 @@ public class Node
     public HashSet<Node> inputs;
     public HashSet<Node> outputs;
     public Vector3 position;
+    public string text;
+    public NodeType type;
 
     public Node() {
         inputs = new HashSet<Node>();
@@ -117,4 +119,15 @@ public class Node
             }
         }
     }
+}
+
+public enum NodeType
+{
+    Input,
+    Output,
+    If,
+    Constant,
+    Operator,
+    Subspace,
+    SelfSubspace
 }
