@@ -6,9 +6,10 @@
 
 #### Эскиз
 
-<img src="./target.jpg" height="600pt"/>
-граф, вычисляющий n-ое число фибоначчи по наивному методу, вершина CB (CallBack) выполняет роль рекурсии
-
+<details>
+  <summary>граф, вычисляющий n-ое число фибоначчи по наивному методу, вершина CB (CallBack) выполняет роль рекурсии</summary>
+  <img src="./target.jpg" height="600pt"/>
+</details>
 
 ### Основные принципы
 1. Красота
@@ -21,13 +22,19 @@
 
 ### Шаг 1 - простые арифметические операции и ветвление
 
-<img src="./step1.svg?sanitize=true"/>
+
 профайлер простого графа
+<details>
+  <summary>профайлер простого графа</summary>
+  <img src="./step1.svg?sanitize=true"/>
+</details>
 
 ### Шаг 2 - рекурсия через подпространство
 
-<img src="./step2.svg?sanitize=true"/>
-профайлер числа Фибоначчи при n=4
+<details>
+  <summary>профайлер числа Фибоначчи при n=4</summary>
+  <img src="./step2.svg?sanitize=true"/>
+</details>
 
 ### Шаг 3 - интерпретатор на питоне через регулярки
 
