@@ -226,23 +226,66 @@ def collect_links(start_node: Node):
     return links, pass_nodes
 
 
-def collect_levels(node: Node, level_map, level=0):
+def collect_levels(node: Node, level_map, all_nodes, level=0):
+    if node not in all_nodes:
+        return
     if node in level_map[level]:
         return
     level_map[level].add(node)
     for obj in node.out_nodes:
-        collect_levels(obj, level_map, level + 1)
+        collect_levels(obj, level_map, all_nodes, level + 1)
     for obj in node.in_nodes:
-        collect_levels(obj, level_map, level - 1)
+        collect_levels(obj, level_map, all_nodes, level - 1)
+
+
+def write_rank(stream, level_map):
+    for level_nodes in level_map.values():
+        if len(level_nodes) > 1:
+            stream.write(
+                '\t{{rank=same {}}}\n'.format(
+                    ' '.join(
+                        '{}'.format(get_uuid(node))
+                        for node in level_nodes
+                    )
+                )
+            )
 
 
 def get_subspace_map(node_names):
-    subspace_map = defaultdict(set)
+    subspace_nodes = defaultdict(set)
+    subspace_children = defaultdict(set)
     for node_name in node_names:
         if node_name.node.subspace:
-            subspace_map[node_name.node.subspace].add(node_name.node)
+            subspace_children[node_name.node.subspace.subspace].add(
+                node_name.node.subspace
+            )
+            subspace_nodes[node_name.node.subspace].add(node_name.node)
 
-    return subspace_map
+    return subspace_nodes, subspace_children
+
+
+def write_subspaces(stream, subspaces, subspace_nodes, subspace_children):
+    for subspace in subspaces:
+        stream.write(
+            '\tsubgraph {} {{\n'.format(get_uuid(subspace, 'cluster'))
+        )
+        start_node = None
+        for node in subspace_nodes[subspace]:
+            if isinstance(node, Input):
+                start_node = node
+            stream.write('\t\t{};\n'.format(get_uuid(node)))
+
+        level_map = defaultdict(set)
+        collect_levels(start_node, level_map, subspace_nodes[subspace])
+        write_rank(stream, level_map)
+
+        write_subspaces(
+            stream,
+            subspace_children[subspace],
+            subspace_nodes,
+            subspace_children,
+        )
+        stream.write('\t}\n')
 
 
 class DebugContext(ContextDecorator):
@@ -254,6 +297,7 @@ class DebugContext(ContextDecorator):
     def create_digraph(self):
         stream = StringIO()
         stream.write('digraph {\n')
+        stream.write('\tnewrank = true;\n')
 
         if self.iterations:
             iterations = filter_iterations(self.iterations)
@@ -263,8 +307,6 @@ class DebugContext(ContextDecorator):
 
             start_node = iterations[0].src.node
             all_links, all_nodes = collect_links(start_node)
-            level_map = defaultdict(set)
-            #collect_levels(start_node, level_map)
             activated_links = {
                 (
                     (iteration.src.node, iteration.dst.node)
@@ -305,24 +347,13 @@ class DebugContext(ContextDecorator):
                     )
                 )
 
-            for subspace, own_nodes in get_subspace_map(all_node_names).items():
-                stream.write(
-                    '\tsubgraph {} {{\n'.format(get_uuid(subspace, 'cluster'))
-                )
-                for node in own_nodes:
-                    stream.write('\t\t{};\n'.format(get_uuid(node)))
-                stream.write('\t}\n')
-
-            for level_nodes in level_map.values():
-                if len(level_nodes) > 1:
-                    stream.write(
-                        '\t{{rank=same {}}}\n'.format(
-                            ' '.join(
-                                '{}'.format(get_uuid(node))
-                                for node in level_nodes
-                            )
-                        )
-                    )
+            subspace_nodes, subspace_children = get_subspace_map(all_node_names)
+            write_subspaces(
+                stream,
+                subspace_children[None],
+                subspace_nodes,
+                subspace_children,
+            )
 
         stream.write('}\n')
         return stream.getvalue()
