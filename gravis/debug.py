@@ -7,6 +7,7 @@ from typing import NamedTuple, List, Tuple
 from .base import Node
 from .nodes import *
 from . import events
+from . import globals
 
 __all__ = (
     'DebugContext',
@@ -15,7 +16,7 @@ __all__ = (
 
 @events.event_activate
 def log_forward(self, *args):
-    debug = DebugContext.current()
+    debug = globals.current_debug()
     if debug:
         values = args[:-1]
         src_node = args[-1]
@@ -29,7 +30,7 @@ def log_forward(self, *args):
 
 @events.event_activate_me
 def log_backward(self, *args):
-    debug = DebugContext.current()
+    debug = globals.current_debug()
     if debug:
         values = args[:-1]
         src_node = args[-1]
@@ -289,7 +290,6 @@ def write_subspaces(stream, subspaces, subspace_nodes, subspace_children):
 
 
 class DebugContext(ContextDecorator):
-    STACK = []
 
     def __init__(self):
         self.iterations: List[Iteration] = []
@@ -359,12 +359,8 @@ class DebugContext(ContextDecorator):
         return stream.getvalue()
 
     def __enter__(self):
-        self.STACK.append(self)
+        globals.DEBUG_STACK.append(self)
         return self
 
     def __exit__(self, *exc):
-        self.STACK.pop()
-
-    @classmethod
-    def current(cls) -> 'DebugContext':
-        return cls.STACK[-1] if cls.STACK else None
+        globals.DEBUG_STACK.pop()

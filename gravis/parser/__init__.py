@@ -6,6 +6,7 @@ from antlr4 import *
 from .GravisListener import GravisListener
 from .GravisLexer import GravisLexer
 from .GravisParser import GravisParser
+from .. import globals
 from .. import nodes
 
 
@@ -55,7 +56,7 @@ class InterpreterListener(GravisListener):
             subspace.__enter__()
             return subspace
         if node_def.self_subspace_def():
-            self_subspace = nodes.Subspace.current()
+            self_subspace = globals.current_subspace()
             return nodes.Subspace(self_subspace)
 
     def enterDef_stmt(self, ctx: GravisParser.Def_stmtContext):
@@ -89,7 +90,7 @@ class InterpreterListener(GravisListener):
         self.get_dotted_name(left) >> self.get_dotted_name(right)
 
     def exitSubspace_def(self, ctx: GravisParser.Subspace_defContext):
-        subspace = nodes.Subspace.current()
+        subspace = globals.current_subspace()
         subspace.__exit__()
 
 

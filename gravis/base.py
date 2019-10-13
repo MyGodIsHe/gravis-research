@@ -2,6 +2,7 @@ import abc
 from typing import Optional, List
 
 from . import events
+from . import globals
 
 __all__ = (
     'Node',
@@ -24,6 +25,8 @@ class Node(metaclass=NodeMeta):
         self.in_nodes: List['Node'] = []
         self.out_nodes: List['Node'] = []
         self.saved_value = self.VALUE_NONE
+        if subspace is None:
+            subspace = globals.current_subspace()
         self.subspace: Optional['Node'] = subspace
 
     def __str__(self):
