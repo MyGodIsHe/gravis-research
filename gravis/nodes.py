@@ -2,6 +2,7 @@ from contextlib import ContextDecorator
 from typing import Optional
 
 from . import events
+from . import globals
 from .base import Node
 
 __all__ = (
@@ -163,8 +164,6 @@ class Operator(Node):
 
 
 class Subspace(ContextDecorator, Node):
-    STACK = []
-
     def __init__(self, parent=None):
         super().__init__()
         self.parent = parent
@@ -220,21 +219,17 @@ class Subspace(ContextDecorator, Node):
                 break
 
     def __enter__(self):
-        self.STACK.append(self)
+        globals.SUBSPACE_STACK.append(self)
         return self
 
     def __exit__(self, *exc):
         self.is_generated = True
-        self.STACK.pop()
-
-    @classmethod
-    def current(cls) -> 'Subspace':
-        return cls.STACK[-1] if cls.STACK else None
+        globals.SUBSPACE_STACK.pop()
 
 
 @events.event_init
 def subspace_init(self, *args, **kwargs):
-    subspace = Subspace.current()
+    subspace = globals.current_subspace()
     if subspace and self not in subspace.inits:
         subspace.inits[self] = (args, kwargs)
         if isinstance(self, Input):
@@ -245,7 +240,7 @@ def subspace_init(self, *args, **kwargs):
 
 @events.event_connect
 def subspace_connect(self, other):
-    subspace = Subspace.current()
+    subspace = globals.current_subspace()
     if subspace:
         if isinstance(self, If) and not isinstance(other, tuple):
             return
