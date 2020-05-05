@@ -33,7 +33,7 @@ public class Loader : MonoBehaviour
         for (var i = 0; i < parts.Count; i++)
         {
             var nodes = parts[i];
-            Node.AlignNodes(nodes);
+            Node.AlignNodesByForceDirected(nodes);
             DrawNodes(nodes, i, volume);
         }
 
@@ -112,8 +112,8 @@ public class Loader : MonoBehaviour
 
 class Volume
 {
-    public Vector3 Min = Vector3.zero;
-    public Vector3 Max = Vector3.zero;
+    public Vector3 Min = new Vector3(float.MaxValue, float.MaxValue, float.MaxValue);
+    public Vector3 Max = new Vector3(float.MinValue, float.MinValue, float.MinValue);
 
     public void Add(GameObject gameObject)
     {
