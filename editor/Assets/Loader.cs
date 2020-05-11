@@ -5,17 +5,17 @@ using Antlr4.Runtime.Tree;
 
 public class Loader : MonoBehaviour
 {
+    public string filePath;
     public GameObject cubeNode;
     public GameObject sphereNode;
 
     private Material lineMaterial;
 
-    // Start is called before the first frame update
-    void Start()
+    public void Load()
     {
         lineMaterial = new Material(Shader.Find("Sprites/Default"));
 
-        var stream = CharStreams.fromPath("../examples/fibonacci.g");
+        var stream = CharStreams.fromPath(filePath);
         var lexer = new GravisLexer(stream);
         var tokens = new CommonTokenStream(lexer);
         var parser = new GravisParser(tokens)
@@ -40,13 +40,6 @@ public class Loader : MonoBehaviour
         var orbit = Camera.main.GetComponent<DragMouseOrbit>();
         orbit.target = volume.GetCenter();
         orbit.distance = volume.GetRadius() * 2;
-    }
-    // https://www.youtube.com/watch?v=pWxucHof_5A Projectile
-
-    // Update is called once per frame
-    void Update()
-    {
-
     }
 
     public void LineTo(GameObject start, GameObject stop) {
