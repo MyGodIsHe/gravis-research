@@ -57,7 +57,7 @@ _Требуется установка antlr4-python3-runtime_
 
 <details>
   <summary>Пример Фибоначчи</summary>
-  <img src="./step5.png"/>
+  <img src="./step5-1.png"/>
 </details>
 
 #### Шаг 5.2 - Работа с узлами в простом графе
