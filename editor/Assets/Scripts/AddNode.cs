@@ -52,10 +52,6 @@ public class AddNode : MonoBehaviour
                 //cubeNodes = FindObjectsWithTag("Cube");
                
                 pref.transform.position =  AlignNode();
-                foreach(var cubeNode in cubeNodes)
-                {
-                    //nodes.Add(node);
-                }
                 //loadListener.AlignNodes();
                 //Node.AlignNodesByForceDirected(nodes);
                 //
@@ -80,4 +76,45 @@ public class AddNode : MonoBehaviour
             Random.Range(-0.1f, 0.1f)
         );
     }
+
+    /*public static void AlignNodes(List<GameObject> nodes)
+    {
+        // set levels
+        var startNode = GetStartNode(nodes);
+        var levels = new Dictionary<Node, int>
+        {
+            [startNode] = 0
+        };
+        var future = new HashSet<Node>
+        {
+            startNode
+        };
+        var pass = new HashSet<Node>();
+        while (future.Count != 0)
+        {
+            var newFuture = new HashSet<Node>();
+            foreach (var node in future)
+            {
+                var level = levels[node];
+                foreach (var input_node in node.inputs)
+                {
+                    if (!pass.Contains(input_node))
+                    {
+                        levels[input_node] = level - 1;
+                        newFuture.Add(input_node);
+                    }
+                }
+                foreach (var output_node in node.outputs)
+                {
+                    if (!pass.Contains(output_node))
+                    {
+                        levels[output_node] = level + 1;
+                        newFuture.Add(output_node);
+                    }
+                }
+                pass.Add(node);
+            }
+            future = newFuture;
+        }
+    }*/
 }
