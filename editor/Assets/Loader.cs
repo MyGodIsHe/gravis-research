@@ -9,37 +9,52 @@ public class Loader : MonoBehaviour
     public GameObject cubeNode;
     public GameObject sphereNode;
 
+    Volume _volume;
+    public LoadListener loader;
     private Material lineMaterial;
+
+    private void Start()
+    {
+        _volume = new Volume();
+    }
 
     public void Load()
     {
+        //add with LegendEvils
+        DragonEventHandler.sInstance.loaded = true;
+        //--------------------
+
         lineMaterial = new Material(Shader.Find("Sprites/Default"));
 
         var stream = CharStreams.fromPath(filePath);
+
+        //add with LegendEvils
+        DragonEventHandler.sInstance.selectedGStream = stream.ToString();
+        //--------------------
+
         var lexer = new GravisLexer(stream);
         var tokens = new CommonTokenStream(lexer);
         var parser = new GravisParser(tokens)
         {
             BuildParseTree = true
         };
-        var loader = new LoadListener();
+        loader = new LoadListener();
         var tree = parser.file_input();
         ParseTreeWalker.Default.Walk(loader, tree);
-
+        
         RelinkSubspaces(loader.subspaces, loader.nodes);
 
-        var volume = new Volume();
         var parts = Node.FindIsolatedGraphs(loader.nodes);
         for (var i = 0; i < parts.Count; i++)
         {
             var nodes = parts[i];
             Node.AlignNodesByForceDirected(nodes);
-            DrawNodes(nodes, i, volume);
+            DrawNodes(nodes, i, _volume);
         }
 
         var orbit = Camera.main.GetComponent<DragMouseOrbit>();
-        orbit.target = volume.GetCenter();
-        orbit.distance = volume.GetRadius() * 2;
+        orbit.target = _volume.GetCenter();
+        orbit.distance = _volume.GetRadius() * 2;
     }
 
     public void LineTo(GameObject start, GameObject stop) {
@@ -68,16 +83,29 @@ public class Loader : MonoBehaviour
             position.y = -position.y;
             var gameObject = Instantiate(cubeNode, position, Quaternion.identity);
             volume.Add(gameObject);
+
+            //add with LegendEvils
+            gameObject.GetComponent<CubeScript>()._node = node;
+            //--------------------
+
             var textMesh = gameObject.GetComponentInChildren<TextMesh>();
             textMesh.text = node.text;
             definitions[node] = gameObject;
             foreach (var input_node in node.inputs)
+            {
                 links.Add((from: input_node, to: node));
+                //Debug.Log("input_node = " + input_node.text + " node = " + node.text);
+            }
             foreach (var output_node in node.outputs)
+            {
                 links.Add((from: node, to: output_node));
+                //Debug.Log("node = " + node.text + " output_node = " + output_node.text);
+            }
         }
         foreach (var (from, to) in links)
+        {
             LineTo(definitions[from], definitions[to]);
+        }
     }
 
     private static void RelinkSubspaces(List<Subspace> subspaces, List<Node> nodes)
