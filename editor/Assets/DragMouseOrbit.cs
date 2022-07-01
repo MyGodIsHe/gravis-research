@@ -61,18 +61,18 @@ public class DragMouseOrbit : MonoBehaviour
 
     public float Zooming(float dist)
     {
-        distance = Mathf.Clamp(dist - Input.GetAxis("Mouse ScrollWheel") * 5, distanceMin, distanceMax);
+        var modify = Input.GetAxis("Mouse ScrollWheel")*5;
 
         if(Input.GetKey(KeyCode.UpArrow))
         {
-            distance = dist - (1) * 2;
+            modify = 1*2;
         }
         if(Input.GetKey(KeyCode.DownArrow))
         {
-            distance = dist - (-1) * 2;
+            modify = -1*2;
         }
 
-        return distance;
+        return Mathf.Clamp(dist - modify, distanceMin, distanceMax);;
     }
     
 }
