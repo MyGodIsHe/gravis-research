@@ -32,6 +32,7 @@ using ParserRuleContext = Antlr4.Runtime.ParserRuleContext;
 /// of the available methods.
 /// </summary>
 [System.CodeDom.Compiler.GeneratedCode("ANTLR", "4.7.2")]
+[System.CLSCompliant(false)]
 public partial class GravisBaseListener : IGravisListener {
 	/// <summary>
 	/// Enter a parse tree produced by <see cref="GravisParser.file_input"/>.
