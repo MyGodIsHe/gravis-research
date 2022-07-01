@@ -41,7 +41,7 @@ public class DragMouseOrbit : MonoBehaviour
 
         Quaternion rotation = Quaternion.Euler(y, x, 0);
 
-        distance = Mathf.Clamp(distance - Input.GetAxis("Mouse ScrollWheel") * 5, distanceMin, distanceMax);
+        distance = Zooming(distance);
 
         Vector3 negDistance = new Vector3(0.0f, 0.0f, -distance);
         Vector3 position = rotation * negDistance + target;
@@ -58,4 +58,21 @@ public class DragMouseOrbit : MonoBehaviour
             angle -= 360F;
         return Mathf.Clamp(angle, min, max);
     }
+
+    public float Zooming(float dist)
+    {
+        var modify = Input.GetAxis("Mouse ScrollWheel")*5;
+
+        if(Input.GetKey(KeyCode.UpArrow))
+        {
+            modify = 1*2;
+        }
+        if(Input.GetKey(KeyCode.DownArrow))
+        {
+            modify = -1*2;
+        }
+
+        return Mathf.Clamp(dist - modify, distanceMin, distanceMax);;
+    }
+    
 }
