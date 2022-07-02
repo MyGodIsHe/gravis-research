@@ -41,13 +41,29 @@ public class DragMouseOrbit : MonoBehaviour
 
         Quaternion rotation = Quaternion.Euler(y, x, 0);
 
-        distance = Mathf.Clamp(distance - Input.GetAxis("Mouse ScrollWheel") * 5, distanceMin, distanceMax);
+        distance = Zooming(distance);
 
         Vector3 negDistance = new Vector3(0.0f, 0.0f, -distance);
         Vector3 position = rotation * negDistance + target;
 
         transform.rotation = rotation;
         transform.position = position;
+
+        // create random node
+        if(Input.GetKeyDown(KeyCode.X))
+        {
+            var gm = GraphManager.Get();
+            var node = new Node
+            {
+                type = NodeType.Constant,
+                text = "X"
+            };
+            var pIndex = Random.Range(0, gm.GetParts().Count);
+            var nIndex = Random.Range(0, gm.GetParts()[pIndex].Count);
+            var target = gm.GetParts()[pIndex][nIndex];
+            node.position = target.position;
+            gm.LinkNode(node, target, gm.GetParts()[pIndex]);
+        }
     }
 
     public static float ClampAngle(float angle, float min, float max)
@@ -58,4 +74,21 @@ public class DragMouseOrbit : MonoBehaviour
             angle -= 360F;
         return Mathf.Clamp(angle, min, max);
     }
+
+    public float Zooming(float dist)
+    {
+        var modify = Input.GetAxis("Mouse ScrollWheel")*5;
+
+        if(Input.GetKey(KeyCode.UpArrow))
+        {
+            modify = 1*2;
+        }
+        if(Input.GetKey(KeyCode.DownArrow))
+        {
+            modify = -1*2;
+        }
+
+        return Mathf.Clamp(dist - modify, distanceMin, distanceMax);;
+    }
+    
 }

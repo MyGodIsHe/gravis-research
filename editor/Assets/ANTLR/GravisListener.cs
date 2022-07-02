@@ -28,6 +28,7 @@ using IToken = Antlr4.Runtime.IToken;
 /// <see cref="GravisParser"/>.
 /// </summary>
 [System.CodeDom.Compiler.GeneratedCode("ANTLR", "4.7.2")]
+[System.CLSCompliant(false)]
 public interface IGravisListener : IParseTreeListener {
 	/// <summary>
 	/// Enter a parse tree produced by <see cref="GravisParser.file_input"/>.
