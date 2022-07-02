@@ -3,9 +3,9 @@ using System.Collections.Generic;
 
 public class Node
 {
-    public readonly GameObject gameObject;
-    public List<Node> inputs = new List<Node>();
-    public List<Node> outputs = new List<Node>();
+    public GameObject gameObject;
+    public List<Node> inputs = new();
+    public List<Node> outputs = new();
     public Vector3 position;
     public string text;
     public NodeType type;
@@ -64,8 +64,6 @@ public class Node
         const float EPSILON = 0.01f;
         const float MAX_ITERS = 1000;
         var changes = new Dictionary<Node, Vector3>();
-
-        AlignNodes(nodes);
 
         for (var i = 0; i < MAX_ITERS; i++)
         {

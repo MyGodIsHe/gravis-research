@@ -14,7 +14,7 @@ public class LoadMenu : MonoBehaviour
         string[] filePaths = Directory.GetFiles(@"../examples/", "*.g");
         foreach (var filePath in filePaths)
         {
-            var gameObject = (GameObject)Instantiate(blankButton, scrollContent.transform);
+            var gameObject = Instantiate(blankButton, scrollContent.transform);
             var text = gameObject.GetComponentInChildren<TextMeshProUGUI>();
             text.text = Path.GetFileNameWithoutExtension(filePath);
             var button = gameObject.GetComponentInChildren<Button>();
@@ -29,7 +29,7 @@ public class LoadMenu : MonoBehaviour
         gameObject.SetActive(false);
         foreach (Transform child in scrollContent.transform)
         {
-            GameObject.Destroy(child.gameObject);
+            Destroy(child.gameObject);
         }
     }
 }

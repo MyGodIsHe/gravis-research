@@ -48,6 +48,22 @@ public class DragMouseOrbit : MonoBehaviour
 
         transform.rotation = rotation;
         transform.position = position;
+
+        // create random node
+        if(Input.GetKeyDown(KeyCode.X))
+        {
+            var gm = GraphManager.Get();
+            var node = new Node
+            {
+                type = NodeType.Constant,
+                text = "X"
+            };
+            var pIndex = Random.Range(0, gm.GetParts().Count);
+            var nIndex = Random.Range(0, gm.GetParts()[pIndex].Count);
+            var target = gm.GetParts()[pIndex][nIndex];
+            node.position = target.position;
+            gm.LinkNode(node, target, gm.GetParts()[pIndex]);
+        }
     }
 
     public static float ClampAngle(float angle, float min, float max)
