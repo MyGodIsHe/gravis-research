@@ -70,6 +70,7 @@ public class Loader : MonoBehaviour
             volume.Add(gameObject);
             var textMesh = gameObject.GetComponentInChildren<TextMesh>();
             textMesh.text = node.text;
+            textMesh.gameObject.AddComponent<LookAtCamera>();;
             definitions[node] = gameObject;
             foreach (var input_node in node.inputs)
                 links.Add((from: input_node, to: node));
