@@ -54,6 +54,7 @@ public class GraphManager : MonoBehaviour
             volume.Add(node.gameObject);
             var textMesh = node.gameObject.GetComponentInChildren<TextMesh>();
             textMesh.text = node.text;
+            textMesh.gameObject.AddComponent<LookAtCamera>();
             definitions[node] = node.gameObject;
             foreach (var input_node in node.inputs)
                 links.Add((from: input_node, to: node));
