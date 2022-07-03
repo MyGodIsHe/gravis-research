@@ -1,5 +1,6 @@
 ﻿using UnityEngine;
 using System.Collections.Generic;
+using System.Threading.Tasks;
 
 public class Node
 {
@@ -57,52 +58,59 @@ public class Node
         return result;
     }
 
-    public static void AlignNodesByForceDirected(List<Node> nodes)
+    public static async Task AlignNodesByForceDirected(List<Node> nodes)
     {
-        const float MIN_DIST = 1.0f;
-        const float DELTA_TIME = 0.1f;
-        const float EPSILON = 0.01f;
-        const float MAX_ITERS = 1000;
-        var changes = new Dictionary<Node, Vector3>();
+        const float MAX_ITERS = 100;
 
         for (var i = 0; i < MAX_ITERS; i++)
         {
-            foreach (var node in nodes)
-                changes[node] = Vector3.zero;
-            foreach (var node in nodes)
-            {
-                foreach (var others in new List<List<Node>> { node.inputs, node.outputs})
-                {
-                    foreach (var other in others)
-                    {
-                        var force = dispersionForce() + node.position - other.position;
-                        var dist = force.magnitude;
-                        changes[node] += force.normalized * DELTA_TIME * (MIN_DIST - dist);
-                    }
-                }
-                foreach (var other in nodes)
-                {
-                    if (node == other) continue;
-                    var force = dispersionForce() + other.position - node.position;
-                    var dist = force.magnitude;
-                    var value = DELTA_TIME / (dist * dist);
-                    changes[other] += force.normalized * value;
-                }
-            }
-            var wasChanges = false;
-            foreach (var pair in changes)
-            {
-                if (pair.Value.magnitude > EPSILON)
-                {
-                    pair.Key.position += pair.Value;
-                    wasChanges = true;
-                }
-            }
-            if (!wasChanges)
+            if (!AlignNodesByForceDirectedStep(nodes))
             {
                 break;
             }
+            await Task.Yield();
         }
+    }
+
+    public static bool AlignNodesByForceDirectedStep(List<Node> nodes)
+    {
+        const float MIN_DIST = 1.0f;
+        const float DELTA_TIME = 0.05f;
+        const float EPSILON = 0.01f;
+        var changes = new Dictionary<Node, Vector3>();
+
+        foreach (var node in nodes)
+            changes[node] = Vector3.zero;
+        foreach (var node in nodes)
+        {
+            foreach (var others in new List<List<Node>> { node.inputs, node.outputs })
+            {
+                foreach (var other in others)
+                {
+                    var force = dispersionForce() + node.position - other.position;
+                    var dist = force.magnitude;
+                    changes[node] += (MIN_DIST - dist) * DELTA_TIME * force.normalized;
+                }
+            }
+            foreach (var other in nodes)
+            {
+                if (node == other) continue;
+                var force = dispersionForce() + other.position - node.position;
+                var dist = force.magnitude;
+                var value = DELTA_TIME / (dist * dist);
+                changes[other] += force.normalized * value;
+            }
+        }
+        var wasChanges = false;
+        foreach (var pair in changes)
+        {
+            if (pair.Value.magnitude > EPSILON)
+            {
+                pair.Key.position += pair.Value;
+                wasChanges = true;
+            }
+        }
+        return wasChanges;
     }
 
     private static Vector3 dispersionForce()

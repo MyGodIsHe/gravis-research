@@ -7,7 +7,7 @@ public class Loader : MonoBehaviour
 {
     public string filePath;
 
-    public void Load()
+    public async void Load()
     {
         var stream = CharStreams.fromPath(filePath);
         var lexer = new GravisLexer(stream);
@@ -22,7 +22,7 @@ public class Loader : MonoBehaviour
 
         RelinkSubspaces(loader.subspaces, loader.nodes);
 
-        GraphManager.Get().Init(loader.nodes);
+        await GraphManager.Get().Init(loader.nodes);
     }
 
 

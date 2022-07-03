@@ -1,4 +1,6 @@
 using System.Collections.Generic;
+using System.Threading;
+using System.Threading.Tasks;
 using UnityEngine;
 
 public class GraphManager : MonoBehaviour
@@ -21,7 +23,7 @@ public class GraphManager : MonoBehaviour
         return singltone;
     }
 
-    public void Init(List<Node> sceneNodes)
+    public async Task Init(List<Node> sceneNodes)
     {
         volume = new Volume();
         parts = Node.FindIsolatedGraphs(sceneNodes);
@@ -29,7 +31,7 @@ public class GraphManager : MonoBehaviour
         {
             var nodes = parts[i];
             Node.AlignNodes(nodes);
-            Node.AlignNodesByForceDirected(nodes);
+            await Node.AlignNodesByForceDirected(nodes);
             CreateGameObjectsFromNodes(nodes, i, volume);
         }
 
@@ -63,46 +65,20 @@ public class GraphManager : MonoBehaviour
             LineTo(definitions[from], definitions[to]);
     }
 
-    public void LinkNode(Node node, Node target, List<Node> graph)
+    public async Task LinkNode(Node node, Node target, List<Node> graph)
     {
         target.outputs.Add(node);
         node.inputs.Add(target);
         graph.Add(node);
 
-        Node.AlignNodesByForceDirected(graph);
+        await Node.AlignNodesByForceDirected(graph);
+
 
         node.gameObject = Instantiate(cubeNode);
         var textMesh = node.gameObject.GetComponentInChildren<TextMesh>();
         textMesh.text = node.text;
 
-        // clear links
-        foreach (var n in graph)
-        {
-            if (n.gameObject.TryGetComponent<LineRenderer>(out var lineRenderer))
-            {
-                lineRenderer.positionCount = 0;
-            }
-
-        }
-
-        // set positions and links
-        var definitions = new Dictionary<Node, GameObject>();
-        var links = new HashSet<(Node from, Node to)>();
-        foreach (var n in graph)
-        {
-            var position = n.position;
-            position.y = -position.y;
-            n.gameObject.transform.position = position;
-
-            definitions[n] = n.gameObject;
-            foreach (var input_node in n.inputs)
-                links.Add((from: input_node, to: n));
-            foreach (var output_node in n.outputs)
-                links.Add((from: n, to: output_node));
-        }
-        foreach (var (from, to) in links)
-            LineTo(definitions[from], definitions[to]);
-
+        ReDraw(graph);
 
         volume = new Volume();
         foreach (var n in graph)
@@ -123,6 +99,37 @@ public class GraphManager : MonoBehaviour
         lineRenderer.positionCount += 2;
         lineRenderer.SetPosition(lineRenderer.positionCount - 2, start.transform.position);
         lineRenderer.SetPosition(lineRenderer.positionCount - 1, stop.transform.position);
+    }
+
+    private void ReDraw(List<Node> graph)
+    {
+        // clear links
+        foreach (var n in graph)
+        {
+            if (n.gameObject.TryGetComponent<LineRenderer>(out var lineRenderer))
+            {
+                lineRenderer.positionCount = 0;
+            }
+
+        }
+
+        // set positions and links
+        var definitions = new Dictionary<Node, GameObject>();
+        var links = new HashSet<(Node from, Node to)>();
+        foreach (var n in graph)
+        {
+            var position = n.position *2;
+            position.y = -position.y;
+            n.gameObject.transform.position = position;
+
+            definitions[n] = n.gameObject;
+            foreach (var input_node in n.inputs)
+                links.Add((from: input_node, to: n));
+            foreach (var output_node in n.outputs)
+                links.Add((from: n, to: output_node));
+        }
+        foreach (var (from, to) in links)
+            LineTo(definitions[from], definitions[to]);
     }
 }
 
