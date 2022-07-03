@@ -7,6 +7,7 @@ public class GraphManager : MonoBehaviour
 
     private static GraphManager singltone;
     private List<List<Node>> parts;
+    private Volume volume;
     private Material lineMaterial;
 
     public static GraphManager Get()
@@ -22,7 +23,7 @@ public class GraphManager : MonoBehaviour
 
     public void Init(List<Node> sceneNodes)
     {
-        var volume = new Volume();
+        volume = new Volume();
         parts = Node.FindIsolatedGraphs(sceneNodes);
         for (var i = 0; i < parts.Count; i++)
         {
@@ -32,9 +33,7 @@ public class GraphManager : MonoBehaviour
             CreateGameObjectsFromNodes(nodes, i, volume);
         }
 
-        var orbit = Camera.main.GetComponent<DragMouseOrbit>();
-        orbit.target = volume.GetCenter();
-        orbit.distance = volume.GetRadius() * 2;
+        volume.CenterCamera();
     }
 
     public List<List<Node>> GetParts()
@@ -79,8 +78,7 @@ public class GraphManager : MonoBehaviour
         // clear links
         foreach (var n in graph)
         {
-            var lineRenderer = n.gameObject.GetComponent<LineRenderer>();
-            if (lineRenderer != null)
+            if (n.gameObject.TryGetComponent<LineRenderer>(out var lineRenderer))
             {
                 lineRenderer.positionCount = 0;
             }
@@ -104,11 +102,18 @@ public class GraphManager : MonoBehaviour
         }
         foreach (var (from, to) in links)
             LineTo(definitions[from], definitions[to]);
+
+
+        volume = new Volume();
+        foreach (var n in graph)
+        {
+            volume.Add(n.gameObject);
+        }
+        volume.CenterCamera();
     }
 
     private void LineTo(GameObject start, GameObject stop) {
-        var lineRenderer = start.GetComponent<LineRenderer>();
-        if (lineRenderer == null)
+        if (!start.TryGetComponent<LineRenderer>(out var lineRenderer))
         {
             lineRenderer = start.AddComponent<LineRenderer>();
             lineRenderer.material = lineMaterial;
@@ -153,5 +158,12 @@ class Volume
     public float GetRadius()
     {
         return ((Max - Min) / 2).magnitude;
+    }
+
+    public void CenterCamera()
+    {
+        var orbit = Camera.main.GetComponent<DragMouseOrbit>();
+        orbit.target = GetCenter();
+        orbit.distance = GetRadius() * 2;
     }
 }
