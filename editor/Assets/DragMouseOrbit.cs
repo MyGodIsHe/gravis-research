@@ -29,7 +29,7 @@ public class DragMouseOrbit : MonoBehaviour
         y = angles.x;
     }
 
-    void LateUpdate()
+    async void LateUpdate()
     {
         if (Input.GetMouseButton(0))
         {
@@ -61,8 +61,12 @@ public class DragMouseOrbit : MonoBehaviour
             var pIndex = Random.Range(0, gm.GetParts().Count);
             var nIndex = Random.Range(0, gm.GetParts()[pIndex].Count);
             var target = gm.GetParts()[pIndex][nIndex];
-            node.position = target.position;
-            gm.LinkNode(node, target, gm.GetParts()[pIndex]);
+            node.position = target.position + new Vector3(
+                Random.Range(-1f, 1f),
+                Random.Range(-1f, 1f),
+                Random.Range(-1f, 1f)
+            );
+            await gm.LinkNode(node, target, gm.GetParts()[pIndex]);
         }
     }
 

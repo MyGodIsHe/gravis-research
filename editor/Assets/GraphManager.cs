@@ -1,6 +1,7 @@
 using System.Collections.Generic;
+using System.Threading;
+using System.Threading.Tasks;
 using UnityEngine;
-using TMPro;
 
 public class GraphManager : MonoBehaviour
 {
@@ -8,9 +9,8 @@ public class GraphManager : MonoBehaviour
 
     private static GraphManager singltone;
     private List<List<Node>> parts;
+    private Volume volume;
     private Material lineMaterial;
-    public Material lineMat;
-
 
     public static GraphManager Get()
     {
@@ -23,21 +23,19 @@ public class GraphManager : MonoBehaviour
         return singltone;
     }
 
-    public void Init(List<Node> sceneNodes)
+    public async Task Init(List<Node> sceneNodes)
     {
-        var volume = new Volume();
+        volume = new Volume();
         parts = Node.FindIsolatedGraphs(sceneNodes);
         for (var i = 0; i < parts.Count; i++)
         {
             var nodes = parts[i];
             Node.AlignNodes(nodes);
-            Node.AlignNodesByForceDirected(nodes);
+            await Node.AlignNodesByForceDirected(nodes);
             CreateGameObjectsFromNodes(nodes, i, volume);
         }
 
-        var orbit = Camera.main.GetComponent<DragMouseOrbit>();
-        orbit.target = volume.GetCenter();
-        orbit.distance = volume.GetRadius() * 2;
+        volume.CenterCamera();
     }
 
     public List<List<Node>> GetParts()
@@ -57,7 +55,6 @@ public class GraphManager : MonoBehaviour
             volume.Add(node.gameObject);
             var textMesh = node.gameObject.GetComponentInChildren<TextMesh>();
             textMesh.text = node.text;
-            textMesh.gameObject.AddComponent<LookAtCamera>();
             definitions[node] = node.gameObject;
             foreach (var input_node in node.inputs)
                 links.Add((from: input_node, to: node));
@@ -68,23 +65,48 @@ public class GraphManager : MonoBehaviour
             LineTo(definitions[from], definitions[to]);
     }
 
-    public void LinkNode(Node node, Node target, List<Node> graph)
+    public async Task LinkNode(Node node, Node target, List<Node> graph)
     {
         target.outputs.Add(node);
         node.inputs.Add(target);
         graph.Add(node);
 
-        Node.AlignNodesByForceDirected(graph);
+        await Node.AlignNodesByForceDirected(graph);
+
 
         node.gameObject = Instantiate(cubeNode);
         var textMesh = node.gameObject.GetComponentInChildren<TextMesh>();
         textMesh.text = node.text;
 
+        ReDraw(graph);
+
+        volume = new Volume();
+        foreach (var n in graph)
+        {
+            volume.Add(n.gameObject);
+        }
+        volume.CenterCamera();
+    }
+
+    private void LineTo(GameObject start, GameObject stop) {
+        if (!start.TryGetComponent<LineRenderer>(out var lineRenderer))
+        {
+            lineRenderer = start.AddComponent<LineRenderer>();
+            lineRenderer.material = lineMaterial;
+            lineRenderer.widthMultiplier = 0.15f;
+            lineRenderer.positionCount = 0;
+        }
+        lineRenderer.positionCount += 2;
+        lineRenderer.SetPosition(lineRenderer.positionCount - 2, start.transform.position);
+        lineRenderer.SetPosition(lineRenderer.positionCount - 1, stop.transform.position);
+    }
+
+    private void ReDraw(List<Node> graph)
+    {
         // clear links
         foreach (var n in graph)
         {
-            var lineRenderer = n.gameObject.GetComponent<LineRenderer>();
-            if (lineRenderer != null)
+            if (n.gameObject.TryGetComponent<LineRenderer>(out var lineRenderer))
             {
                 lineRenderer.positionCount = 0;
             }
@@ -96,7 +118,7 @@ public class GraphManager : MonoBehaviour
         var links = new HashSet<(Node from, Node to)>();
         foreach (var n in graph)
         {
-            var position = n.position;
+            var position = n.position *2;
             position.y = -position.y;
             n.gameObject.transform.position = position;
 
@@ -108,20 +130,6 @@ public class GraphManager : MonoBehaviour
         }
         foreach (var (from, to) in links)
             LineTo(definitions[from], definitions[to]);
-    }
-
-    private void LineTo(GameObject start, GameObject stop) {
-        var lineRenderer = start.GetComponent<LineRenderer>();
-        if (lineRenderer == null)
-        {
-            lineRenderer = start.AddComponent<LineRenderer>();
-            lineRenderer.material = lineMat;
-            lineRenderer.widthMultiplier = 0.15f;
-            lineRenderer.positionCount = 0;
-        }
-        lineRenderer.positionCount += 2;
-        lineRenderer.SetPosition(lineRenderer.positionCount - 2, start.transform.position);
-        lineRenderer.SetPosition(lineRenderer.positionCount - 1, stop.transform.position);
     }
 }
 
@@ -157,5 +165,12 @@ class Volume
     public float GetRadius()
     {
         return ((Max - Min) / 2).magnitude;
+    }
+
+    public void CenterCamera()
+    {
+        var orbit = Camera.main.GetComponent<DragMouseOrbit>();
+        orbit.target = GetCenter();
+        orbit.distance = GetRadius() * 2;
     }
 }
