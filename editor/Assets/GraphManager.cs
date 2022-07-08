@@ -10,7 +10,7 @@ public class GraphManager : MonoBehaviour
     private static GraphManager singltone;
     private List<List<Node>> parts;
     private Volume volume;
-    private Material lineMaterial;
+    public Material lineMaterial;
 
     public static GraphManager Get()
     {
@@ -18,7 +18,7 @@ public class GraphManager : MonoBehaviour
         {
             var gameObject = GameObject.Find("GRAPH_MANAGER");
             singltone = gameObject.GetComponentInChildren<GraphManager>();
-            singltone.lineMaterial = new Material(Shader.Find("Sprites/Default"));
+            //singltone.lineMaterial = new Material(Shader.Find("Sprites/Default"));
         }
         return singltone;
     }
@@ -55,6 +55,7 @@ public class GraphManager : MonoBehaviour
             volume.Add(node.gameObject);
             var textMesh = node.gameObject.GetComponentInChildren<TextMesh>();
             textMesh.text = node.text;
+            textMesh.gameObject.AddComponent<LookAtCamera>();
             definitions[node] = node.gameObject;
             foreach (var input_node in node.inputs)
                 links.Add((from: input_node, to: node));
