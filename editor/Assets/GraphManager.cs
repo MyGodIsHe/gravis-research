@@ -1,5 +1,6 @@
 using System.Collections.Generic;
 using UnityEngine;
+using TMPro;
 
 public class GraphManager : MonoBehaviour
 {
@@ -8,6 +9,8 @@ public class GraphManager : MonoBehaviour
     private static GraphManager singltone;
     private List<List<Node>> parts;
     private Material lineMaterial;
+    public Material lineMat;
+
 
     public static GraphManager Get()
     {
@@ -112,7 +115,7 @@ public class GraphManager : MonoBehaviour
         if (lineRenderer == null)
         {
             lineRenderer = start.AddComponent<LineRenderer>();
-            lineRenderer.material = lineMaterial;
+            lineRenderer.material = lineMat;
             lineRenderer.widthMultiplier = 0.15f;
             lineRenderer.positionCount = 0;
         }

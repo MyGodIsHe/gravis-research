@@ -1,0 +1,59 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!21 &2100000
+Material:
+  serializedVersion: 6
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_Name: circle_2
+  m_Shader: {fileID: 4800000, guid: 7ed86c048ca724d6c98c18cf39e52880, type: 3}
+  m_ShaderKeywords: ETC1_EXTERNAL_ALPHA _AUXROTMODE_LINEAR
+  m_LightmapFlags: 4
+  m_EnableInstancingVariants: 0
+  m_DoubleSidedGI: 0
+  m_CustomRenderQueue: -1
+  stringTagMap: {}
+  disabledShaderPasses: []
+  m_SavedProperties:
+    serializedVersion: 3
+    m_TexEnvs:
+    - _MainTex:
+        m_Texture: {fileID: 0}
+        m_Scale: {x: 1, y: 1}
+        m_Offset: {x: 0, y: 0}
+    m_Floats:
+    - _AuxCenterX: 0
+    - _AuxCenterY: 0
+    - _AuxOffset: 0.4
+    - _AuxOrbitWidth: 0.01
+    - _AuxPresent: 0
+    - _AuxRadius: 0.08
+    - _AuxRotCounterClock: 0
+    - _AuxRotMode: 0
+    - _AuxRotModifier1: 1
+    - _AuxRotModifier2: 1
+    - _AuxRotModifier3: 1
+    - _AuxRotSpeed: 1
+    - _AuxRotating: 0
+    - _AuxSharpness: 400
+    - _CenterX: 0.5
+    - _CenterY: 0.5
+    - _ColorMask: 15
+    - _Fill: 0
+    - _PulsingScale: 0
+    - _PulsingSpeed: 1
+    - _Radius: 0.412
+    - _Sharpness: 58
+    - _Stencil: 0
+    - _StencilComp: 8
+    - _StencilOp: 0
+    - _StencilReadMask: 255
+    - _StencilWriteMask: 255
+    - _TexAlpha: 0.4
+    m_Colors:
+    - _AuxColor: {r: 0, g: 0, b: 0, a: 1}
+    - _AuxOrbitColor: {r: 1, g: 0, b: 0, a: 1}
+    - _Color: {r: 0.8431373, g: 0.1254902, b: 0.4666667, a: 1}
+    - _Color2: {r: 0, g: 1, b: 1, a: 1}
