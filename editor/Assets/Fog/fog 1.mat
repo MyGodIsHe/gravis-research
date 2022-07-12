@@ -11,9 +11,10 @@ Material:
   m_Shader: {fileID: 10753, guid: 0000000000000000f000000000000000, type: 0}
   m_ValidKeywords: []
   m_InvalidKeywords:
-  - _ALPHATEST_ON
+  - _ALPHAPREMULTIPLY_ON
   - _AUXROTMODE_LINEAR
   - _COLORADDSUBDIFF_ON
+  - _EMISSION
   - _MAPPING_LATITUDE_LONGITUDE_LAYOUT
   - _MODE_RADIAL
   - _MODE_STAR
@@ -24,7 +25,7 @@ Material:
   m_LightmapFlags: 0
   m_EnableInstancingVariants: 0
   m_DoubleSidedGI: 0
-  m_CustomRenderQueue: -1
+  m_CustomRenderQueue: 2000
   stringTagMap: {}
   disabledShaderPasses: []
   m_SavedProperties:
@@ -227,7 +228,7 @@ Material:
     - _Distribution: 16
     - _Divider: 0
     - _Divisions: 10
-    - _DstBlend: 0
+    - _DstBlend: 10
     - _EmissionEnabled: 0
     - _EmittingSpeed: 0.2
     - _EnableExternalAlpha: 0
@@ -266,7 +267,7 @@ Material:
     - _MaxAngle: 360
     - _Metallic: 0
     - _MirrorOnBack: 0
-    - _Mode: 1
+    - _Mode: 3
     - _Modifier1: 1
     - _Modifier2: 1
     - _Modifier3: 1
@@ -381,7 +382,7 @@ Material:
     - _WidthJitter: 0
     - _WindQuality: 0
     - _WireThickness: 100
-    - _ZWrite: 1
+    - _ZWrite: 0
     m_Colors:
     - _AuxColor: {r: 0, g: 0, b: 0, a: 1}
     - _AuxOrbitColor: {r: 1, g: 0, b: 0, a: 1}
