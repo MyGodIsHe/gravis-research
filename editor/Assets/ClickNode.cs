@@ -1,11 +1,15 @@
 using System.Collections;
+using System;
 using System.Collections.Generic;
 using UnityEngine;
 
 public class ClickNode : MonoBehaviour
 {
     public static ClickNode instance;
+    public Action OnNodeSelected;
+    public Action OnNodeDeselected;
     public GameObject node;
+    
     private void Awake()
     {
         instance = this;
@@ -23,14 +27,14 @@ public class ClickNode : MonoBehaviour
                 if (hit.transform.name != null)
                 {
                     node = hit.transform.gameObject;
-                    print( " object is clicked by mouse");
-                    print(hit.transform.name);
-                }
+                    OnNodeSelected?.Invoke();
+                }       
             
             }
-            else //if(ray.transform == null)
+            else
             {
                 node = null;
+                OnNodeDeselected?.Invoke();
             }
         }
     }
