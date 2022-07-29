@@ -11,6 +11,7 @@ public class GraphManager : MonoBehaviour
     private List<List<Node>> parts;
     private Volume volume;
     private Material lineMaterial;
+    public GameObject arrow;
 
     public static GraphManager Get()
     {
@@ -62,7 +63,12 @@ public class GraphManager : MonoBehaviour
                 links.Add((from: node, to: output_node));
         }
         foreach (var (from, to) in links)
+        {
             LineTo(definitions[from], definitions[to]);
+            
+        }
+
+        
     }
 
     public async Task LinkNode(Node node, Node target, List<Node> graph)
@@ -99,6 +105,8 @@ public class GraphManager : MonoBehaviour
         lineRenderer.positionCount += 2;
         lineRenderer.SetPosition(lineRenderer.positionCount - 2, start.transform.position);
         lineRenderer.SetPosition(lineRenderer.positionCount - 1, stop.transform.position);
+        var arr = Instantiate(arrow, start.transform);
+        arr.transform.LookAt(stop.transform);
     }
 
     private void ReDraw(List<Node> graph)
