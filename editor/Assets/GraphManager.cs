@@ -76,6 +76,7 @@ public class GraphManager : MonoBehaviour
 
 
         node.gameObject = Instantiate(cubeNode);
+        node.gameObject.GetComponent<NodeLink>().nodeLink = node;
         var textMesh = node.gameObject.GetComponentInChildren<TextMesh>();
         textMesh.text = node.text;
 

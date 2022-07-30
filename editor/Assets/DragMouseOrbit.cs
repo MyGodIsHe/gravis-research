@@ -67,20 +67,7 @@ public class DragMouseOrbit : MonoBehaviour
             var pIndex = Random.Range(0, gm.GetParts().Count);
             var nIndex = Random.Range(0, gm.GetParts()[pIndex].Count);
             var target = gm.GetParts()[pIndex][nIndex];
-            /*for (int i = 0; i < gm.GetParts().Count; i++)
-            {
-                for (int y = 0; y < gm.GetParts()[i].Count; y++)
-                {
-                    if(clickNode.node == gm.GetParts()[i][y].gameObject)
-                    {
-                        target = gm.GetParts()[i][y];
-                        break;
-                    }
-                    
-                }
-            }*/
             target = ClickNode.instance.node.GetComponent<NodeLink>().nodeLink;
-            //gm.volume.Add(target.gameObject);
             node.position = target.position + new Vector3(
                 Random.Range(-1f, 1f),
                 Random.Range(-1f, 1f),
