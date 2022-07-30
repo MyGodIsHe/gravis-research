@@ -35,16 +35,4 @@ public class ChangeColor : MonoBehaviour
         if(ClickNode.instance.node != this.gameObject)
         mesh.material.color = DeselectColor;
     }
-
-    /*void Update()
-    {
-        if(ClickNode.instance.node == this.gameObject)
-        {
-            mesh.material.color = SelectColor;
-        }
-        else
-        {
-            mesh.material.color = DeselectColor;
-        }
-    }*/
 }
