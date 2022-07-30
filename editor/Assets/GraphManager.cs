@@ -52,6 +52,7 @@ public class GraphManager : MonoBehaviour
             var position = (node.position + new Vector3(0, 0, offset)) * 2;
             position.y = -position.y;
             node.gameObject = Instantiate(cubeNode, position, Quaternion.identity);
+            node.gameObject.GetComponent<NodeLink>().nodeLink = node;
             volume.Add(node.gameObject);
             var textMesh = node.gameObject.GetComponentInChildren<TextMesh>();
             textMesh.text = node.text;
@@ -75,6 +76,7 @@ public class GraphManager : MonoBehaviour
 
 
         node.gameObject = Instantiate(cubeNode);
+        node.gameObject.GetComponent<NodeLink>().nodeLink = node;
         var textMesh = node.gameObject.GetComponentInChildren<TextMesh>();
         textMesh.text = node.text;
 
