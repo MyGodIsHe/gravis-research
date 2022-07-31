@@ -21,6 +21,12 @@ public class DragMouseOrbit : MonoBehaviour
     float x = 0.0f;
     float y = 0.0f;
 
+    public ClickNode clickNode;
+
+    private void OnEnable() {
+        clickNode = ClickNode.instance;
+    }
+
     // Use this for initialization
     void Start()
     {
@@ -61,6 +67,7 @@ public class DragMouseOrbit : MonoBehaviour
             var pIndex = Random.Range(0, gm.GetParts().Count);
             var nIndex = Random.Range(0, gm.GetParts()[pIndex].Count);
             var target = gm.GetParts()[pIndex][nIndex];
+            target = ClickNode.instance.node.GetComponent<NodeLink>().nodeLink;
             node.position = target.position + new Vector3(
                 Random.Range(-1f, 1f),
                 Random.Range(-1f, 1f),
