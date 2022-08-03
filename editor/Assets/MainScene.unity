@@ -38,7 +38,7 @@ RenderSettings:
   m_ReflectionIntensity: 1
   m_CustomReflection: {fileID: 0}
   m_Sun: {fileID: 170076734}
-  m_IndirectSpecularColor: {r: 0.44824892, g: 0.49827558, b: 0.575583, a: 1}
+  m_IndirectSpecularColor: {r: 0.44824904, g: 0.49827605, b: 0.5755831, a: 1}
   m_UseRadianceAmbientProbe: 0
 --- !u!157 &3
 LightmapSettings:
@@ -899,8 +899,8 @@ MonoBehaviour:
   distance: 2
   xSpeed: 20
   ySpeed: 20
-  yMinLimit: -90
-  yMaxLimit: 90
+  yMinLimit: -85
+  yMaxLimit: 85
   distanceMin: 0.5
   distanceMax: 15
   clickNode: {fileID: 440361165}
