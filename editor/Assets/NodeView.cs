@@ -1,3 +1,4 @@
+using TMPro;
 using UnityEngine;
 
 public class NodeView : MonoBehaviour
@@ -5,7 +6,7 @@ public class NodeView : MonoBehaviour
     public Node nodeLink;
     
     [SerializeField] private Transform origin;
-    [SerializeField] private TextMesh text;
+    [SerializeField] private TextMeshPro text;
 
     public void SetText(string value)
     {
@@ -14,7 +15,9 @@ public class NodeView : MonoBehaviour
 
     private void Update()
     {
-        origin.up = Camera.main.transform.up;
-        origin.forward = Camera.main.transform.forward * -1f;
+        var delta = Camera.main.transform.position - transform.position;
+        var rotation = Quaternion.LookRotation(delta, Camera.main.transform.up);
+
+        origin.rotation = rotation;
     }
 }
