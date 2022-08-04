@@ -12,6 +12,11 @@ public class GraphManager : MonoBehaviour
     private Volume volume;
     private Material lineMaterial;
     public GameObject arrow;
+    public LineArrow lr;
+
+    /*private void OnEnable() {
+        lr = LineArrow.instance;
+    }*/
 
     public static GraphManager Get()
     {
@@ -54,7 +59,7 @@ public class GraphManager : MonoBehaviour
             position.y = -position.y;
             node.gameObject = Instantiate(cubeNode, position, Quaternion.identity);
             node.gameObject.GetComponent<NodeLink>().nodeLink = node;
-            volume.Add(node.gameObject);
+            volume.Add(node.gameObject);            
             var textMesh = node.gameObject.GetComponentInChildren<TextMesh>();
             textMesh.text = node.text;
             definitions[node] = node.gameObject;
@@ -83,6 +88,8 @@ public class GraphManager : MonoBehaviour
 
         node.gameObject = Instantiate(cubeNode);
         node.gameObject.GetComponent<NodeLink>().nodeLink = node;
+        //lr.lastNode = lr.GetLastNode(node.gameObject);
+        //lr.ArrowPosition(lr.lastNode);
         var textMesh = node.gameObject.GetComponentInChildren<TextMesh>();
         textMesh.text = node.text;
 
@@ -107,8 +114,8 @@ public class GraphManager : MonoBehaviour
         lineRenderer.positionCount += 2;
         lineRenderer.SetPosition(lineRenderer.positionCount - 2, start.transform.position);
         lineRenderer.SetPosition(lineRenderer.positionCount - 1, stop.transform.position);
-        var arr = Instantiate(arrow, start.transform);
-        arr.transform.LookAt(stop.transform);
+        lr.ArrowPosition(start.gameObject, stop.gameObject); 
+        
     }
 
     private void ReDraw(List<Node> graph)
