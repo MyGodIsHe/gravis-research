@@ -175,7 +175,7 @@ public class Node
 
         // set positions
         foreach (var pair in group_by_level)
-        {
+        { 
             var offset = new Vector3(-pair.Value.Count / 2.0f, 0, 0);
             int i = 0;
             foreach (var node in pair.Value)

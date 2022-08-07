@@ -1,6 +1,8 @@
 ﻿/*
  * Based on http://wiki.unity3d.com/index.php?title=MouseOrbitImproved
  */
+
+using UI;
 using UnityEngine;
 
 [AddComponentMenu("Camera-Control/Mouse Orbit with zoom")]
@@ -58,23 +60,31 @@ public class DragMouseOrbit : MonoBehaviour
         // create random node
         if(Input.GetKeyDown(KeyCode.X))
         {
-            var gm = GraphManager.Get();
-            var node = new Node
-            {
-                type = NodeType.Constant,
-                text = "X"
-            };
-            var pIndex = Random.Range(0, gm.GetParts().Count);
-            var nIndex = Random.Range(0, gm.GetParts()[pIndex].Count);
-            var target = gm.GetParts()[pIndex][nIndex];
-            target = ClickNode.instance.node.GetComponent<NodeView>().nodeLink;
-            node.position = target.position + new Vector3(
-                Random.Range(-1f, 1f),
-                Random.Range(-1f, 1f),
-                Random.Range(-1f, 1f)
-            );
-            await gm.LinkNode(node, target, gm.GetParts()[pIndex]);
+            NodeWheel.Instance.Show(Input.mousePosition);
         }
+    }
+
+    public static async void CreateNode(NodeType type, string text)
+    {
+        var gm = GraphManager.Get();
+        var node = new Node
+        {
+            type = type,
+            text = text
+        };
+        var pIndex = Random.Range(0, gm.GetParts().Count);
+        var nIndex = Random.Range(0, gm.GetParts()[pIndex].Count);
+        
+        var target = gm.GetParts()[pIndex][nIndex];
+        target = ClickNode.instance.node.GetComponent<NodeView>().nodeLink;
+        
+        node.position = target.position + new Vector3(
+            Random.Range(-1f, 1f),
+            Random.Range(-1f, 1f),
+            Random.Range(-1f, 1f)
+        );
+            
+        await gm.LinkNode(node, target, gm.GetParts()[pIndex]);
     }
 
     public static float ClampAngle(float angle, float min, float max)
