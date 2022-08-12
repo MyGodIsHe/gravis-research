@@ -25,6 +25,7 @@ public class DragMouseOrbit : MonoBehaviour
     float y = 0.0f;
 
     public ClickNode clickNode;
+    private bool _isSelecting = false;
 
     private void OnEnable() {
         clickNode = ClickNode.instance;
@@ -62,8 +63,9 @@ public class DragMouseOrbit : MonoBehaviour
         if (Input.GetKeyDown(KeyCode.X))
         {
             var parent = ClickNode.instance.node.GetComponent<NodeView>().nodeLink;
-            if (parent != null)
+            if (parent != null && !_isSelecting)
             {
+                _isSelecting = true;
                 var point = Camera.main.WorldToScreenPoint(parent.gameObject.transform.position);
                 
                 var wheel = NodeTypeWheelSelector.Instance;
@@ -73,9 +75,11 @@ public class DragMouseOrbit : MonoBehaviour
                 input.SetPosition(point);
                 
                 var type = await wheel.Select();
-                var text = await input.TypeText();
+                var strategy = SelectionHelper.GetStrategy(type);
+                var text = await strategy.GetText();
                 
                 CreateNode(type, text, parent);
+                _isSelecting = false;
             }
         }
     }
