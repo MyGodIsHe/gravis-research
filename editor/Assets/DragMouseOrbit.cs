@@ -3,6 +3,7 @@
  */
 
 using UI;
+using UI.Selection;
 using UnityEngine;
 
 [AddComponentMenu("Camera-Control/Mouse Orbit with zoom")]
@@ -58,25 +59,37 @@ public class DragMouseOrbit : MonoBehaviour
         transform.position = position;
 
         // create random node
-        if(Input.GetKeyDown(KeyCode.X))
+        if (Input.GetKeyDown(KeyCode.X))
         {
-            NodeWheel.Instance.Show(Input.mousePosition);
+            var parent = ClickNode.instance.node.GetComponent<NodeView>().nodeLink;
+            if (parent != null)
+            {
+                var point = Camera.main.WorldToScreenPoint(parent.gameObject.transform.position);
+                
+                var wheel = NodeTypeWheelSelector.Instance;
+                var input = NodeInputField.Instance;
+                
+                wheel.SetPosition(point);
+                input.SetPosition(point);
+                
+                var type = await wheel.Select();
+                var text = await input.TypeText();
+                
+                CreateNode(type, text, parent);
+            }
         }
     }
 
-    public static async void CreateNode(NodeType type, string text)
+    public static async void CreateNode(NodeType type, string text, Node target)
     {
         var gm = GraphManager.Get();
+        var pIndex = Random.Range(0, gm.GetParts().Count);
+        
         var node = new Node
         {
             type = type,
             text = text
         };
-        var pIndex = Random.Range(0, gm.GetParts().Count);
-        var nIndex = Random.Range(0, gm.GetParts()[pIndex].Count);
-        
-        var target = gm.GetParts()[pIndex][nIndex];
-        target = ClickNode.instance.node.GetComponent<NodeView>().nodeLink;
         
         node.position = target.position + new Vector3(
             Random.Range(-1f, 1f),
