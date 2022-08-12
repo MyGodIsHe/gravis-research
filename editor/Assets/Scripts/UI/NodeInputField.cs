@@ -11,7 +11,6 @@ namespace UI
         
         public void SetPosition(Vector2 position)
         {
-            position += Vector2.up * rectTransform.sizeDelta.y / 2;
             rectTransform.anchoredPosition = position;
         }
 
