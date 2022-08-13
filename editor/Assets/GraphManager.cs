@@ -134,7 +134,7 @@ public class GraphManager : MonoBehaviour
         _stop.transform.SetParent(stop.transform);
         _stop.transform.localPosition = Vector3.zero;
         _stop.transform.LookAt(start.transform);
-        _stop.transform.Translate(Vector3.forward*0.7f, Space.Self);
+        _stop.transform.Translate(Vector3.forward*0.8f, Space.Self);
         lineRend.SetPosition(lineRend.positionCount - 1, _stop.transform.position);   
         lr.ArrowPoint(stop.gameObject, _stop.gameObject, start.gameObject);
         Destroy(_stop);        
