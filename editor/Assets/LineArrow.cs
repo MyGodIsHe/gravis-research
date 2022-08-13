@@ -6,43 +6,16 @@ public class LineArrow : MonoBehaviour
 {
     public static LineArrow instance;
     public GameObject arrow;
-    public GraphManager gm;
-    public GameObject lastNode;
-    public LineRenderer lineRenderer;
-    public bool setArrow = true;
+    private GraphManager gm;
+    private bool setArrow = true;
     
     private void Awake() {
-        instance = this;
+        instance = GameObject.Find("ClickNode").GetComponent<LineArrow>();
         gm = GraphManager.Get();
     }
 
     private void OnEnable() {
         setArrow = true;
-    }
-
-    public void SetArrow()
-    {
-        lineRenderer = lastNode.GetComponent<LineRenderer>();
-        RaycastHit hit;
-        for (int i = 1; i < lineRenderer.positionCount-1; i++)
-        {
-            Physics.Raycast(transform.position, lineRenderer.GetPosition(i), out hit);
-            if(hit.transform != null)
-            {
-                print(hit.transform.position);
-                GameObject arr = Instantiate(arrow, hit.transform);
-                arr.transform.position = hit.point;
-                arr.transform.LookAt(transform.position);
-            }
-            else
-            {
-                print("none");
-            }
-            if(i == lineRenderer.positionCount-1)
-            {
-                //setArrow = false;
-            }
-        }
     }
     
     public void ArrowPosition(GameObject start, GameObject target)
@@ -51,16 +24,17 @@ public class LineArrow : MonoBehaviour
 
         if(Physics.Linecast(start.transform.position, target.transform.position, out hit))
         {
-            GameObject arr = Instantiate(arrow, hit.transform);
+            GameObject arr = Instantiate(arrow, target.transform);
             arr.transform.position = hit.point;
             arr.transform.LookAt(start.transform);
+            arr.transform.GetChild(0).transform.localPosition = new Vector3(0,0,0.2f);
         }     
     }
 
-    public GameObject GetLastNode(GameObject createdNode)
+    public void ArrowPoint(GameObject arrowParent, GameObject arrowPoint, GameObject startNode)
     {
-        return createdNode;
+        GameObject arr = Instantiate(arrow, arrowParent.transform);
+        arr.transform.position = arrowPoint.transform.position;
+        arr.transform.LookAt(startNode.transform);
     }
-
-    
 }

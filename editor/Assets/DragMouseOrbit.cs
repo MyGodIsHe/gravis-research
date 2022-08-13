@@ -75,10 +75,7 @@ public class DragMouseOrbit : MonoBehaviour
                 Random.Range(-1f, 1f),
                 Random.Range(-1f, 1f)
             );
-            lineArrow.ArrowPosition(ClickNode.instance.node, target.gameObject);
             await gm.LinkNode(node, target, gm.GetParts()[pIndex]);
-            
-
         }
     }
 
