@@ -20,7 +20,6 @@ public class GraphManager : MonoBehaviour
         {
             var gameObject = GameObject.Find("GRAPH_MANAGER");
             singltone = gameObject.GetComponentInChildren<GraphManager>();
-            //singltone.lineMaterial = new Material(Shader.Find("Sprites/Default"));
         }
         return singltone;
     }
@@ -92,22 +91,20 @@ public class GraphManager : MonoBehaviour
         volume.CenterCamera();
     }
 
-    private void LineTo(GameObject start, GameObject stop) {
-        //if (!start.TryGetComponent<LineRenderer>(out var lineRenderer))
-        //{
-            var LineObject = new GameObject();
-            if(LineObjectList != null || LineObjectList[LineObjectList.Count-1].GetComponent<LineRenderer>().positionCount == 2)
-            {
-                LineObject = new GameObject();
-                LineObject.transform.SetParent(start.transform);
-                LineObject.AddComponent<LineRenderer>();
-                LineObjectList.Add(LineObject);
-            }
-            var lineRend = LineObject.GetComponent<LineRenderer>();
-            lineRend.material = lineMaterial;
-            lineRend.widthMultiplier = 0.1f;
-            lineRend.positionCount = 0;
-        //}
+    private void LineTo(GameObject start, GameObject stop) 
+    {
+        var LineObject = new GameObject();
+        if(LineObjectList != null || LineObjectList[LineObjectList.Count-1].GetComponent<LineRenderer>().positionCount == 2)
+        {
+            LineObject = new GameObject();
+            LineObject.transform.SetParent(start.transform);
+            LineObject.AddComponent<LineRenderer>();
+            LineObjectList.Add(LineObject);
+        }
+        var lineRend = LineObject.GetComponent<LineRenderer>();
+        lineRend.material = lineMaterial;
+        lineRend.widthMultiplier = 0.1f;
+        lineRend.positionCount = 0;
         
         //set line and instance arrow
         var _start = GameObject.CreatePrimitive(PrimitiveType.Cube);
