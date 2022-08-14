@@ -759,6 +759,7 @@ GameObject:
   m_Component:
   - component: {fileID: 440361166}
   - component: {fileID: 440361165}
+  - component: {fileID: 440361167}
   m_Layer: 0
   m_Name: ClickNode
   m_TagString: Untagged
@@ -794,6 +795,19 @@ Transform:
   m_Father: {fileID: 0}
   m_RootOrder: 5
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &440361167
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 440361164}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 49cff610bbea9a846b31f2a7ed4adeba, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  arrow: {fileID: 1817977119132632334, guid: b3ac9d795607c63438525ec74a147cb8, type: 3}
 --- !u!1 &534669902
 GameObject:
   m_ObjectHideFlags: 0
@@ -895,8 +909,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 8492ddb8286d4224686a889e8b70898e, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  target: {x: 0, y: 0, z: 0}
-  distance: 2
+  target: {x: -0.1344409, y: -2.976099, z: 1.3785503}
+  distance: 15.099237
   xSpeed: 20
   ySpeed: 20
   yMinLimit: -85
@@ -904,6 +918,7 @@ MonoBehaviour:
   distanceMin: 0.5
   distanceMax: 15
   clickNode: {fileID: 440361165}
+  lineArrow: {fileID: 440361167}
 --- !u!114 &534669907
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -1244,10 +1259,26 @@ PrefabInstance:
     m_Modifications:
     - target: {fileID: 4051490632978517694, guid: a1d249571a6cc994c9f493b7cbee6619,
         type: 3}
+      propertyPath: lr
+      value: 
+      objectReference: {fileID: 440361167}
+    - target: {fileID: 4051490632978517694, guid: a1d249571a6cc994c9f493b7cbee6619,
+        type: 3}
+      propertyPath: arrow
+      value: 
+      objectReference: {fileID: 1817977119132632334, guid: b3ac9d795607c63438525ec74a147cb8,
+        type: 3}
+    - target: {fileID: 4051490632978517694, guid: a1d249571a6cc994c9f493b7cbee6619,
+        type: 3}
       propertyPath: cubeNode
       value: 
       objectReference: {fileID: 1434904966156409039, guid: 28b16409ef4f5e84e9bfa008bc287113,
         type: 3}
+    - target: {fileID: 4051490632978517694, guid: a1d249571a6cc994c9f493b7cbee6619,
+        type: 3}
+      propertyPath: lineMaterial
+      value: 
+      objectReference: {fileID: 2100000, guid: 6803c167016d0e14db890919e81dfc9e, type: 2}
     - target: {fileID: 5531473085386928601, guid: a1d249571a6cc994c9f493b7cbee6619,
         type: 3}
       propertyPath: m_RootOrder

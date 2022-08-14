@@ -10,7 +10,9 @@ public class GraphManager : MonoBehaviour
     private static GraphManager singltone;
     private List<List<Node>> parts;
     private Volume volume;
-    private Material lineMaterial;
+    public Material lineMaterial;
+    public LineArrow lr;
+    public List<GameObject> LineObjectList;
 
     public static GraphManager Get()
     {
@@ -18,7 +20,6 @@ public class GraphManager : MonoBehaviour
         {
             var gameObject = GameObject.Find("GRAPH_MANAGER");
             singltone = gameObject.GetComponentInChildren<GraphManager>();
-            singltone.lineMaterial = new Material(Shader.Find("Sprites/Default"));
         }
         return singltone;
     }
@@ -90,29 +91,62 @@ public class GraphManager : MonoBehaviour
         volume.CenterCamera();
     }
 
-    private void LineTo(GameObject start, GameObject stop) {
-        if (!start.TryGetComponent<LineRenderer>(out var lineRenderer))
+    private void LineTo(GameObject start, GameObject stop) 
+    {
+        var LineObject = new GameObject();
+        if(LineObjectList != null || LineObjectList[LineObjectList.Count-1].GetComponent<LineRenderer>().positionCount == 2)
         {
-            lineRenderer = start.AddComponent<LineRenderer>();
-            lineRenderer.material = lineMaterial;
-            lineRenderer.widthMultiplier = 0.15f;
-            lineRenderer.positionCount = 0;
+            LineObject = new GameObject();
+            LineObject.transform.SetParent(start.transform);
+            LineObject.AddComponent<LineRenderer>();
+            LineObjectList.Add(LineObject);
         }
-        lineRenderer.positionCount += 2;
-        lineRenderer.SetPosition(lineRenderer.positionCount - 2, start.transform.position);
-        lineRenderer.SetPosition(lineRenderer.positionCount - 1, stop.transform.position);
+        var lineRend = LineObject.GetComponent<LineRenderer>();
+        lineRend.material = lineMaterial;
+        lineRend.widthMultiplier = 0.1f;
+        lineRend.positionCount = 0;
+        
+        //set line and instance arrow
+        var _start = GameObject.CreatePrimitive(PrimitiveType.Cube);
+        _start.transform.SetParent(start.transform);
+        _start.transform.localPosition = Vector3.zero;
+        _start.transform.LookAt(stop.transform);
+        _start.transform.Translate(Vector3.forward*0.8f, Space.Self);
+        lineRend.positionCount += 2;
+        lineRend.SetPosition(lineRend.positionCount - 2, _start.transform.position);
+        Destroy(_start);
+        var _stop = GameObject.CreatePrimitive(PrimitiveType.Cube);
+        _stop.transform.SetParent(stop.transform);
+        _stop.transform.localPosition = Vector3.zero;
+        _stop.transform.LookAt(start.transform);
+        _stop.transform.Translate(Vector3.forward*0.8f, Space.Self);
+        lineRend.SetPosition(lineRend.positionCount - 1, _stop.transform.position);   
+        lr.ArrowPoint(stop.gameObject, _stop.gameObject, start.gameObject);
+        Destroy(_stop);
     }
 
     private void ReDraw(List<Node> graph)
     {
         // clear links
+        
         foreach (var n in graph)
         {
+            NodeView nodeView = n.gameObject.GetComponent<NodeView>();
             if (n.gameObject.TryGetComponent<LineRenderer>(out var lineRenderer))
             {
                 lineRenderer.positionCount = 0;
             }
-
+            for (int i = 0; i < LineObjectList.Count; i++)
+            {
+                Destroy(LineObjectList[i]);
+            }
+            for (int i = 0; i < n.gameObject.transform.childCount; i++)
+            {
+                if(n.gameObject.transform.GetChild(i) != nodeView.Origin)
+                {
+                    Destroy(n.gameObject.transform.GetChild(i).gameObject);
+                }   
+            }
         }
 
         // set positions and links
