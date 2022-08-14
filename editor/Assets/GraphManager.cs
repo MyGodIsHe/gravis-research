@@ -3,7 +3,6 @@ using System.Threading;
 using System.Threading.Tasks;
 using UnityEngine;
 
-
 public class GraphManager : MonoBehaviour
 {
     public GameObject cubeNode;
@@ -11,14 +10,7 @@ public class GraphManager : MonoBehaviour
     private static GraphManager singltone;
     private List<List<Node>> parts;
     private Volume volume;
-    public Material lineMaterial;
-    public GameObject arrow;
-    public LineArrow lr;
-    public List<GameObject> LineObjectList;
-
-    public List<GameObject> startNodes;
-    public List<GameObject> endNodes;
-
+    private Material lineMaterial;
 
     public static GraphManager Get()
     {
@@ -26,7 +18,7 @@ public class GraphManager : MonoBehaviour
         {
             var gameObject = GameObject.Find("GRAPH_MANAGER");
             singltone = gameObject.GetComponentInChildren<GraphManager>();
-            //singltone.lineMaterial = new Material(Shader.Find("Sprites/Default"));
+            singltone.lineMaterial = new Material(Shader.Find("Sprites/Default"));
         }
         return singltone;
     }
@@ -60,10 +52,10 @@ public class GraphManager : MonoBehaviour
             var position = (node.position + new Vector3(0, 0, offset)) * 2;
             position.y = -position.y;
             node.gameObject = Instantiate(cubeNode, position, Quaternion.identity);
-            node.gameObject.GetComponent<NodeLink>().nodeLink = node;
-            volume.Add(node.gameObject);            
-            var textMesh = node.gameObject.GetComponentInChildren<TextMesh>();
-            textMesh.text = node.text;
+            var view = node.gameObject.GetComponent<NodeView>();
+            view.nodeLink = node;
+            volume.Add(node.gameObject);
+            view.SetText(node.text);
             definitions[node] = node.gameObject;
             foreach (var input_node in node.inputs)
                 links.Add((from: input_node, to: node));
@@ -71,12 +63,7 @@ public class GraphManager : MonoBehaviour
                 links.Add((from: node, to: output_node));
         }
         foreach (var (from, to) in links)
-        {
             LineTo(definitions[from], definitions[to]);
-            
-        }
-
-        
     }
 
     public async Task LinkNode(Node node, Node target, List<Node> graph)
@@ -89,55 +76,31 @@ public class GraphManager : MonoBehaviour
 
 
         node.gameObject = Instantiate(cubeNode);
-        node.gameObject.GetComponent<NodeLink>().nodeLink = node;
-        graph.Add(node.gameObject.GetComponent<NodeLink>().nodeLink);
-        var textMesh = node.gameObject.GetComponentInChildren<TextMesh>();
-        textMesh.text = node.text;
+        var view = node.gameObject.GetComponent<NodeView>();
+        view.nodeLink = node;
+        view.SetText(node.text);
+
+        ReDraw(graph);
 
         volume = new Volume();
         foreach (var n in graph)
         {
             volume.Add(n.gameObject);
         }
-        volume.Add(node.gameObject);
-        ReDraw(graph);
         volume.CenterCamera();
     }
 
     private void LineTo(GameObject start, GameObject stop) {
-        //if (!start.TryGetComponent<LineRenderer>(out var lineRenderer))
-        //{
-            var LineObject = new GameObject();
-            if(LineObjectList != null || LineObjectList[LineObjectList.Count-1].GetComponent<LineRenderer>().positionCount == 2)
-            {
-                LineObject = new GameObject();
-                LineObject.transform.SetParent(start.transform);
-                LineObject.AddComponent<LineRenderer>();
-                LineObjectList.Add(LineObject);
-            }
-            var lineRend = LineObject.GetComponent<LineRenderer>();
-            lineRend.material = lineMaterial;
-            lineRend.widthMultiplier = 0.1f;
-            lineRend.positionCount = 0;
-        //}
-        
-        //set line and instance arrow
-        var _start = GameObject.CreatePrimitive(PrimitiveType.Cube);
-        _start.transform.SetParent(start.transform);
-        _start.transform.localPosition = Vector3.zero;
-        _start.transform.LookAt(stop.transform);
-        _start.transform.Translate(Vector3.forward*0.8f, Space.Self);
-        lineRend.positionCount += 2;
-        lineRend.SetPosition(lineRend.positionCount - 2, _start.transform.position);
-        Destroy(_start);
-        var _stop = GameObject.CreatePrimitive(PrimitiveType.Cube);
-        _stop.transform.SetParent(stop.transform);
-        _stop.transform.localPosition = Vector3.zero;
-        _stop.transform.LookAt(start.transform);
-        _stop.transform.Translate(Vector3.forward*0.8f, Space.Self);
-        lineRend.SetPosition(lineRend.positionCount - 1, _stop.transform.position);   
-        lr.ArrowPoint(stop.gameObject, _stop.gameObject, start.gameObject);
-        Destroy(_stop);        
+        if (!start.TryGetComponent<LineRenderer>(out var lineRenderer))
+        {
+            lineRenderer = start.AddComponent<LineRenderer>();
+            lineRenderer.material = lineMaterial;
+            lineRenderer.widthMultiplier = 0.15f;
+            lineRenderer.positionCount = 0;
+        }
+        lineRenderer.positionCount += 2;
+        lineRenderer.SetPosition(lineRenderer.positionCount - 2, start.transform.position);
+        lineRenderer.SetPosition(lineRenderer.positionCount - 1, stop.transform.position);
     }
 
     private void ReDraw(List<Node> graph)
@@ -149,17 +112,7 @@ public class GraphManager : MonoBehaviour
             {
                 lineRenderer.positionCount = 0;
             }
-            for (int i = 0; i < LineObjectList.Count; i++)
-            {
-                Destroy(LineObjectList[i]);
-            }
-            for (int i = 0; i < n.gameObject.transform.childCount; i++)
-            {
-                if(n.gameObject.transform.GetChild(i).childCount > 0)
-                {
-                    Destroy(n.gameObject.transform.GetChild(i).gameObject);
-                }   
-            }
+
         }
 
         // set positions and links
@@ -178,10 +131,7 @@ public class GraphManager : MonoBehaviour
                 links.Add((from: n, to: output_node));
         }
         foreach (var (from, to) in links)
-        {
             LineTo(definitions[from], definitions[to]);
-            
-        }
     }
 }
 

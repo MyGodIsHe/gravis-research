@@ -22,7 +22,6 @@ public class DragMouseOrbit : MonoBehaviour
     float y = 0.0f;
 
     public ClickNode clickNode;
-    public LineArrow lineArrow;
 
     private void OnEnable() {
         clickNode = ClickNode.instance;
@@ -68,8 +67,7 @@ public class DragMouseOrbit : MonoBehaviour
             var pIndex = Random.Range(0, gm.GetParts().Count);
             var nIndex = Random.Range(0, gm.GetParts()[pIndex].Count);
             var target = gm.GetParts()[pIndex][nIndex];
-            target = ClickNode.instance.node.GetComponent<NodeLink>().nodeLink;
-            
+            target = ClickNode.instance.node.GetComponent<NodeView>().nodeLink;
             node.position = target.position + new Vector3(
                 Random.Range(-1f, 1f),
                 Random.Range(-1f, 1f),
