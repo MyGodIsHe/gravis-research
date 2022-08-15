@@ -8,6 +8,11 @@ public class NodeView : MonoBehaviour
     [SerializeField] private Transform origin;
     [SerializeField] private TextMeshPro text;
 
+    public Transform Origin
+    {
+        get {return origin;}
+    }
+
     public void SetText(string value)
     {
         text.text = value;
