@@ -1,6 +1,9 @@
 ﻿/*
  * Based on http://wiki.unity3d.com/index.php?title=MouseOrbitImproved
  */
+
+using UI;
+using UI.Selection;
 using UnityEngine;
 
 [AddComponentMenu("Camera-Control/Mouse Orbit with zoom")]
@@ -22,6 +25,7 @@ public class DragMouseOrbit : MonoBehaviour
     float y = 0.0f;
 
     public ClickNode clickNode;
+    private bool _isSelecting = false;
 
     private void OnEnable() {
         clickNode = ClickNode.instance;
@@ -56,25 +60,48 @@ public class DragMouseOrbit : MonoBehaviour
         transform.position = position;
 
         // create random node
-        if(Input.GetKeyDown(KeyCode.X))
+        if (Input.GetKeyDown(KeyCode.X))
         {
-            var gm = GraphManager.Get();
-            var node = new Node
+            var parent = ClickNode.instance.node.GetComponent<NodeView>().nodeLink;
+            if (parent != null && !_isSelecting)
             {
-                type = NodeType.Constant,
-                text = "X"
-            };
-            var pIndex = Random.Range(0, gm.GetParts().Count);
-            var nIndex = Random.Range(0, gm.GetParts()[pIndex].Count);
-            var target = gm.GetParts()[pIndex][nIndex];
-            target = ClickNode.instance.node.GetComponent<NodeView>().nodeLink;
-            node.position = target.position + new Vector3(
-                Random.Range(-1f, 1f),
-                Random.Range(-1f, 1f),
-                Random.Range(-1f, 1f)
-            );
-            await gm.LinkNode(node, target, gm.GetParts()[pIndex]);
+                _isSelecting = true;
+                var point = Camera.main.WorldToScreenPoint(parent.gameObject.transform.position);
+                
+                var wheel = NodeTypeWheelSelector.Instance;
+                var input = NodeInputField.Instance;
+                
+                wheel.SetPosition(point);
+                input.SetPosition(point);
+                
+                var type = await wheel.Select();
+                var strategy = SelectionHelper.GetStrategy(type);
+                var text = await strategy.GetText();
+                
+                CreateNode(type, text, parent);
+                _isSelecting = false;
+            }
         }
+    }
+
+    public static async void CreateNode(NodeType type, string text, Node target)
+    {
+        var gm = GraphManager.Get();
+        var pIndex = Random.Range(0, gm.GetParts().Count);
+        
+        var node = new Node
+        {
+            type = type,
+            text = text
+        };
+        
+        node.position = target.position + new Vector3(
+            Random.Range(-1f, 1f),
+            Random.Range(-1f, 1f),
+            Random.Range(-1f, 1f)
+        );
+            
+        await gm.LinkNode(node, target, gm.GetParts()[pIndex]);
     }
 
     public static float ClampAngle(float angle, float min, float max)
