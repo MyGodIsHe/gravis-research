@@ -417,6 +417,7 @@ GameObject:
   m_Component:
   - component: {fileID: 132829073}
   - component: {fileID: 132829072}
+  - component: {fileID: 132829074}
   m_Layer: 0
   m_Name: SceneContext
   m_TagString: Untagged
@@ -438,7 +439,8 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   _scriptableObjectInstallers:
   - {fileID: 11400000, guid: 3077910f56148fc4d827bfaa76335114, type: 2}
-  _monoInstallers: []
+  _monoInstallers:
+  - {fileID: 132829074}
   _installerPrefabs: []
   _autoRun: 1
   OnPreInstall:
@@ -471,6 +473,18 @@ Transform:
   m_Father: {fileID: 0}
   m_RootOrder: 5
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &132829074
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 132829071}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 4ec76e169fc24cc8ad60f938b9a5c8e8, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
 --- !u!1 &170076733
 GameObject:
   m_ObjectHideFlags: 0
@@ -545,8 +559,7 @@ Light:
   m_BounceIntensity: 1
   m_ColorTemperature: 6570
   m_UseColorTemperature: 0
-  m_BoundingSphereOverride: {x: 7.564175e+28, y: 6.4887395e-10, z: 0.00000016225819,
-    w: 2.1509448e+23}
+  m_BoundingSphereOverride: {x: 0, y: 0, z: 0, w: 0}
   m_UseBoundingSphereOverride: 0
   m_UseViewFrustumForShadowCasterCull: 1
   m_ShadowRadius: 0
@@ -1086,7 +1099,6 @@ MonoBehaviour:
   distanceMin: 0.5
   distanceMax: 15
   clickNode: {fileID: 440361165}
-  lineArrow: {fileID: 440361167}
 --- !u!114 &534669907
 MonoBehaviour:
   m_ObjectHideFlags: 0

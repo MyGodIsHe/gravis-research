@@ -8,11 +8,16 @@ namespace Installers
     public class SettingsInstaller : ScriptableObjectInstaller<SettingsInstaller>
     {
         [SerializeField] private ColorSettings colorSettings;
+        [SerializeField] private NavigationSettings navigationSettings;
 
         public override void InstallBindings()
         {
             Container
                 .BindInstance(colorSettings)
+                .AsSingle();
+
+            Container
+                .BindInstance(navigationSettings)
                 .AsSingle();
         }
     }

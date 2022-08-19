@@ -2,9 +2,15 @@
  * Based on http://wiki.unity3d.com/index.php?title=MouseOrbitImproved
  */
 
+using System.Threading.Tasks;
+using DG.Tweening;
+using DG.Tweening.Core;
+using DG.Tweening.Plugins.Options;
+using Settings;
 using UI;
 using UI.Selection;
 using UnityEngine;
+using Zenject;
 
 [AddComponentMenu("Camera-Control/Mouse Orbit with zoom")]
 public class DragMouseOrbit : MonoBehaviour
@@ -27,6 +33,16 @@ public class DragMouseOrbit : MonoBehaviour
     public ClickNode clickNode;
     private bool _isSelecting = false;
 
+    private TweenerCore<Vector3, Vector3, VectorOptions> _sequence;
+
+    private NavigationSettings _navigationSettings;
+
+    [Inject]
+    private void Construct(NavigationSettings navigationSettings)
+    {
+        _navigationSettings = navigationSettings;
+    }
+    
     private void OnEnable() {
         clickNode = ClickNode.instance;
     }
@@ -82,6 +98,24 @@ public class DragMouseOrbit : MonoBehaviour
                 _isSelecting = false;
             }
         }
+
+        if (Input.GetKeyDown(_navigationSettings.MoveKey))
+        {
+            var ray = Camera.main.ScreenPointToRay(Input.mousePosition);
+            
+            var cast = Physics.Raycast(ray, out var hit);
+            if (cast)
+            {
+                var node = hit.collider.GetComponent<NodeView>();
+                if (node)
+                {
+                    _sequence?.Kill();
+                    _sequence = DOTween
+                        .To(() => target, value => target = value, node.transform.position,  _navigationSettings.MoveDuration)
+                        .SetEase(_navigationSettings.MoveEase);
+                }
+            }
+;        }
     }
 
     public static async void CreateNode(NodeType type, string text, Node target)
@@ -102,6 +136,11 @@ public class DragMouseOrbit : MonoBehaviour
         );
             
         await gm.LinkNode(node, target, gm.GetParts()[pIndex]);
+    }
+    
+    public static async Task FocusOn(Node node)
+    {
+        
     }
 
     public static float ClampAngle(float angle, float min, float max)
