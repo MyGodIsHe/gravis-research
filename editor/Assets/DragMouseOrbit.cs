@@ -109,7 +109,11 @@ public class DragMouseOrbit : MonoBehaviour
                 var node = hit.collider.GetComponent<NodeView>();
                 if (node)
                 {
-                    _sequence?.Kill();
+                    if (_sequence.IsActive())
+                    {
+                        _sequence?.Complete();
+                    }
+
                     _sequence = DOTween
                         .To(() => target, value => target = value, node.transform.position,  _navigationSettings.MoveDuration)
                         .SetEase(_navigationSettings.MoveEase);
