@@ -22,4 +22,4 @@ MonoBehaviour:
   navigationSettings:
     <MoveKey>k__BackingField: 324
     <MoveDuration>k__BackingField: 0.5
-    <MoveEase>k__BackingField: 25
+    <MoveEase>k__BackingField: 4
