@@ -1,5 +1,4 @@
-﻿using Serialization;
-using Zenject;
+﻿using Zenject;
 
 namespace Installers
 {
@@ -7,10 +6,7 @@ namespace Installers
     {
         public override void InstallBindings()
         {
-            Container
-                .BindInterfacesTo<SerializationService>()
-                .AsSingle()
-                .NonLazy();
+            
         }
     }
 }
