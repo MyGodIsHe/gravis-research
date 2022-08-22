@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using System.IO;
 using System.Threading;
 using System.Threading.Tasks;
 using UnityEngine;
@@ -69,7 +70,7 @@ public class GraphManager : MonoBehaviour
 
     public async Task LinkNode(Node node, Node target, List<Node> graph)
     {
-        target.outputs.Add(node);
+        target.trueOutputs.Add(node);
         node.inputs.Add(target);
         graph.Add(node);
 

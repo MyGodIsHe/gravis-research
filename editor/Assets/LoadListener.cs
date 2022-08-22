@@ -1,5 +1,6 @@
 ﻿using Antlr4.Runtime.Misc;
 using System.Collections.Generic;
+using UnityEngine;
 
 public class LoadListener : GravisBaseListener
 {
@@ -10,6 +11,10 @@ public class LoadListener : GravisBaseListener
 
     private Node CreateNode(GravisParser.Node_defContext context) {
         var node = new Node();
+        if (subspaceStack.Count != 0)
+        {
+            node.subspace = subspaceStack.Peek();
+        }
         if (context.input_def() != null)
         {
             if (subspaceStack.Count != 0)
@@ -56,7 +61,7 @@ public class LoadListener : GravisBaseListener
         else if (context.self_subspace_def() != null)
         {
             node.type = NodeType.SelfSubspace;
-            node.text = "S";
+            node.text = "SS";
         }
         else
             node.text = "?";
@@ -86,12 +91,21 @@ public class LoadListener : GravisBaseListener
         return node;
     }
 
+    private List<Node> getOutputs(GravisParser.Dotted_nameContext context, Node node)
+    {
+        if (context.NAME() != null && context.NAME().GetText() == "false")
+        {
+            return node.falseOutputs;
+        }
+        return node.trueOutputs;
+    }
+
     public override void EnterLink_stmt([NotNull] GravisParser.Link_stmtContext context)
     {
         var pair = context.dotted_name();
         var left = getDottedName(pair[0]);
         var right = getDottedName(pair[1]);
-        left.outputs.Add(right);
+        getOutputs(pair[0], left).Add(right);
         right.inputs.Add(left);
     }
 

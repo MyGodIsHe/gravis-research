@@ -25,24 +25,14 @@ public class Loader : MonoBehaviour
         await GraphManager.Get().Init(loader.nodes);
     }
 
-
     private static void RelinkSubspaces(List<Subspace> subspaces, List<Node> nodes)
     {
         foreach (var subspace in subspaces)
         {
             foreach (var input_node in subspace.node.inputs)
             {
-                input_node.outputs.Clear();
-                input_node.outputs.Add(subspace.input);
-                subspace.input.inputs.Add(input_node);
-                subspace.input.inputs.Remove(subspace.node);
-            }
-            foreach (var output_node in subspace.node.outputs)
-            {
-                output_node.inputs.Clear();
-                output_node.inputs.Add(subspace.output);
-                subspace.output.outputs.Add(output_node);
-                subspace.output.outputs.Remove(subspace.node);
+                subspace.input.inputs.AddRange(input_node.outputs);
+                input_node.inputs.Add(subspace.node);
             }
             nodes.Remove(subspace.node);
         }
