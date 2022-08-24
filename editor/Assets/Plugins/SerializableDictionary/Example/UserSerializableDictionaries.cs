@@ -4,7 +4,7 @@ using System;
 using UnityEngine;
 
 [Serializable]
-public class StringStringDictionary : SerializableDictionary<string, string> {}
+public class StringSpriteDictionary : SerializableDictionary<string, Sprite> {}
 
 [Serializable]
 public class ObjectColorDictionary : SerializableDictionary<UnityEngine.Object, Color> {}

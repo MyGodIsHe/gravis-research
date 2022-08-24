@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using UI.Selection.Strategies;
 
 namespace UI.Selection
 {
@@ -26,7 +27,7 @@ namespace UI.Selection
                 case NodeType.SelfSubspace:
                 default:
                     var text = _texts[type];
-                    return new StaticNodeTextStrategy(text);
+                    return new FixedNodeTextStrategy(text);
             }
         }
     }

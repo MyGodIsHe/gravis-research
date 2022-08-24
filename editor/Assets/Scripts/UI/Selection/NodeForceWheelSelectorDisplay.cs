@@ -1,12 +1,13 @@
-﻿using UnityEngine;
+﻿using Nodes.Enums;
+using UnityEngine;
 
 namespace UI.Selection
 {
-    public class NodeTypeWheelSelectorDisplay : WheelSelectorDisplayBase<NodeType>
+    public class NodeForceWheelSelectorDisplay : WheelSelectorDisplayBase<ENodeForce>
     {
         [SerializeField] private WheelSelectorDisplayBase<string> display;
         
-        public override void Display(NodeType value)
+        public override void Display(ENodeForce value)
         {
             display.Display(value.ToString());
         }

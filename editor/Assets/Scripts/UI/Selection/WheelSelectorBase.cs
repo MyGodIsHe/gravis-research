@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using System.Linq;
 using System.Threading.Tasks;
 using Settings;
 using UI.Selection.Interfaces;
@@ -17,13 +18,13 @@ namespace UI.Selection
         [SerializeField] private WheelSelectorCursor cursor;
         [SerializeField] private WheelSelectorDisplayBase<T> display;
 
-        private IDictionary<WheelSelectorItem, T> _items = new Dictionary<WheelSelectorItem, T>();
+        private IDictionary<WheelSelectorItemBase, T> _items = new Dictionary<WheelSelectorItemBase, T>();
         private T _currentValue;
 
         private ColorSettings _colorSettings;
 
-        protected abstract IDictionary<WheelSelectorItem, T> GenerateItems(GameObject root);
-        protected abstract WheelSelectorItem GetCurrentItem(IEnumerable<WheelSelectorItem> items);
+        protected abstract IDictionary<WheelSelectorItemBase, T> GenerateItems(GameObject root);
+        protected abstract WheelSelectorItemBase GetCurrentItem(IEnumerable<WheelSelectorItemBase> items);
         protected abstract bool IsSelectRequested();
 
         [Inject]
@@ -61,7 +62,7 @@ namespace UI.Selection
             return _currentValue;
         }
 
-        private void Follow(WheelSelectorItem item)
+        private void Follow(WheelSelectorItemBase item)
         {
             var value = _items[item];
             

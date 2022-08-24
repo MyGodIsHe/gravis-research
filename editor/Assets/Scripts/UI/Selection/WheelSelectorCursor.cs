@@ -9,13 +9,13 @@ namespace UI.Selection
 {
     public class WheelSelectorCursor : MonoBehaviour
     {
-        public event Action<WheelSelectorItem> OnFollow = _ => { };
+        public event Action<WheelSelectorItemBase> OnFollow = _ => { };
 
         [SerializeField] private float followDuration;
         
         [SerializeField] private Image image;
 
-        private WheelSelectorItem _item;
+        private WheelSelectorItemBase _item;
         private TweenerCore<Quaternion, Vector3, QuaternionOptions> _sequence;
         
         public void SetColor(Color color)
@@ -23,7 +23,7 @@ namespace UI.Selection
             image.color = color;
         }
 
-        public void SetItem(WheelSelectorItem item)
+        public void SetItem(WheelSelectorItemBase item)
         {
             if (_item == item) return;
 
@@ -31,8 +31,12 @@ namespace UI.Selection
 
             var targetRotation = Vector2.SignedAngle(Vector2.down, item.Bisector);
             var value = new Vector3(0f, 0f, targetRotation);
-            
-            _sequence?.Kill();
+
+            if (_sequence != null && _sequence.IsActive())
+            {
+                _sequence.Kill();
+            }
+
             _sequence = transform.DORotate(value, followDuration);
             _sequence.onComplete += Complete;
 
