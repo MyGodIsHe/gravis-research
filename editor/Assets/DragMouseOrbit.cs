@@ -6,6 +6,7 @@ using System.Threading.Tasks;
 using DG.Tweening;
 using DG.Tweening.Core;
 using DG.Tweening.Plugins.Options;
+using Nodes.Enums;
 using Settings;
 using UI;
 using UI.Selection;
@@ -84,17 +85,25 @@ public class DragMouseOrbit : MonoBehaviour
                 _isSelecting = true;
                 var point = Camera.main.WorldToScreenPoint(parent.gameObject.transform.position);
                 
-                var wheel = NodeTypeWheelSelector.Instance;
+                var typeWheel = NodeTypeWheelSelector.Instance;
+                var forceWheel = NodeForceWheelSelector.Instance;
                 var input = NodeInputField.Instance;
                 
-                wheel.SetPosition(point);
+                typeWheel.SetPosition(point);
+                forceWheel.SetPosition(point);
                 input.SetPosition(point);
                 
-                var type = await wheel.Select();
-                var strategy = SelectionHelper.GetStrategy(type);
-                var text = await strategy.GetText();
+                var type = await typeWheel.Select();
                 
-                CreateNode(type, text, parent);
+                var textStrategy = SelectionHelper.GetStrategy(type);
+                var text = await textStrategy.GetText();
+
+                await Task.Yield();
+
+                var forceStrategy = ForceHelper.GetStrategy(type);
+                var force = await forceStrategy.SelectForce();
+                
+                CreateNode(type, text, parent, force);
                 _isSelecting = false;
             }
         }
@@ -109,9 +118,9 @@ public class DragMouseOrbit : MonoBehaviour
                 var node = hit.collider.GetComponent<NodeView>();
                 if (node)
                 {
-                    if (_sequence.IsActive())
+                    if (_sequence != null && _sequence.IsActive())
                     {
-                        _sequence?.Complete();
+                        _sequence.Complete();
                     }
 
                     _sequence = DOTween
@@ -122,7 +131,7 @@ public class DragMouseOrbit : MonoBehaviour
 ;        }
     }
 
-    public static async void CreateNode(NodeType type, string text, Node target)
+    public static async void CreateNode(NodeType type, string text, Node target, ENodeForce force)
     {
         var gm = GraphManager.Get();
         var pIndex = Random.Range(0, gm.GetParts().Count);
@@ -138,13 +147,8 @@ public class DragMouseOrbit : MonoBehaviour
             Random.Range(-1f, 1f),
             Random.Range(-1f, 1f)
         );
-            
-        await gm.LinkNode(node, target, gm.GetParts()[pIndex]);
-    }
-    
-    public static async Task FocusOn(Node node)
-    {
-        
+
+        await gm.LinkNode(node, target, gm.GetParts()[pIndex], force);
     }
 
     public static float ClampAngle(float angle, float min, float max)

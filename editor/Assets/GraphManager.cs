@@ -1,6 +1,7 @@
 using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
+using Nodes.Enums;
 using UnityEngine;
 
 public class GraphManager : MonoBehaviour
@@ -67,10 +68,19 @@ public class GraphManager : MonoBehaviour
             LineTo(definitions[from], definitions[to]);
     }
 
-    public async Task LinkNode(Node node, Node target, List<Node> graph)
+    public async Task LinkNode(Node node, Node target, List<Node> graph, ENodeForce force)
     {
-        target.outputs.Add(node);
-        node.inputs.Add(target);
+        if (force == ENodeForce.Out)
+        {
+            target.outputs.Add(node);
+            node.inputs.Add(target);
+        }
+        else
+        {
+            target.inputs.Add(node);
+            node.outputs.Add(target);
+        }
+
         graph.Add(node);
 
         await Node.AlignNodesByForceDirected(graph);

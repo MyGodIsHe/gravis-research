@@ -1,10 +1,10 @@
 ﻿using System.Threading.Tasks;
 
-namespace UI.Selection
+namespace UI.Selection.Strategies
 {
-    public class StaticNodeTextStrategy : NodeTextStrategyBase
+    public class FixedNodeTextStrategy : NodeTextStrategyBase
     {
-        public StaticNodeTextStrategy(string text)
+        public FixedNodeTextStrategy(string text)
         {
             _text = text;
         }

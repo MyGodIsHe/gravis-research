@@ -1,8 +1,10 @@
-﻿namespace UI.Selection
+using Nodes.Enums;
+
+namespace UI.Selection
 {
-    public class NodeTypeWheelSelector : TypedWheelSelectorBase<NodeType>
+    public class NodeForceWheelSelector : TypedWheelSelectorBase<ENodeForce>
     {
-        protected override string GetKey(NodeType value)
+        protected override string GetKey(ENodeForce value)
         {
             return value.ToString();
         }
@@ -19,7 +21,7 @@
             }
         }
         
-        public static NodeTypeWheelSelector Instance
+        public static NodeForceWheelSelector Instance
         {
             get;
             private set;
