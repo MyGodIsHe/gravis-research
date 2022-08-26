@@ -13,6 +13,14 @@
   <img src="./target.jpg" height="600pt"/>
 </details>
 
+### Интерпретатор
+
+Установка зависимостей:
+`python3 -m pip install antlr4-python3-runtime==4.7.2`
+
+Запуск:
+`python3 gi examples\fibonacci.g 3`
+
 ### Основные принципы
 1. Красота
 2. Компактность

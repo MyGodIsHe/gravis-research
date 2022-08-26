@@ -1,15 +1,23 @@
 ﻿using UnityEngine;
 using System.Collections.Generic;
 using System.Threading.Tasks;
+using System.Linq;
 
 public class Node
 {
     public GameObject gameObject;
+    public Subspace subspace;
     public List<Node> inputs = new();
-    public List<Node> outputs = new();
+    public List<Node> trueOutputs = new();
+    public List<Node> falseOutputs = new();
     public Vector3 position;
     public string text;
     public NodeType type;
+
+    public override string ToString()
+    {
+        return string.Format("Node({0}:{1})", type, text);
+    }
 
     public static List<List<Node>> FindIsolatedGraphs(List<Node> nodes)
     {
@@ -26,6 +34,8 @@ public class Node
         }
         return result;
     }
+
+    public IEnumerable<Node> outputs => Enumerable.Concat(trueOutputs, falseOutputs);
 
     private static void FindSubgraph(Node node, List<Node> result)
     {
@@ -50,7 +60,7 @@ public class Node
         while (e.MoveNext())
         {
             var node = e.Current;
-            if (node.inputs.Count < result.inputs.Count && node.outputs.Count != 0)
+            if (node.inputs.Count < result.inputs.Count && (node.trueOutputs.Count != 0 || node.falseOutputs.Count != 0))
             {
                 result = node;
             }
@@ -83,14 +93,11 @@ public class Node
             changes[node] = Vector3.zero;
         foreach (var node in nodes)
         {
-            foreach (var others in new List<List<Node>> { node.inputs, node.outputs })
+            foreach (var other in Enumerable.Concat(node.inputs, node.outputs))
             {
-                foreach (var other in others)
-                {
-                    var force = dispersionForce() + node.position - other.position;
-                    var dist = force.magnitude;
-                    changes[node] += (MIN_DIST - dist) * DELTA_TIME * force.normalized;
-                }
+                var force = dispersionForce() + node.position - other.position;
+                var dist = force.magnitude;
+                changes[node] += (MIN_DIST - dist) * DELTA_TIME * force.normalized;
             }
             foreach (var other in nodes)
             {

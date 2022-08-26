@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using System.IO;
 using System.Threading;
 using System.Threading.Tasks;
 using Nodes.Enums;
@@ -72,15 +73,14 @@ public class GraphManager : MonoBehaviour
     {
         if (force == ENodeForce.Out)
         {
-            target.outputs.Add(node);
+            target.trueOutputs.Add(node);
             node.inputs.Add(target);
         }
         else
         {
             target.inputs.Add(node);
-            node.outputs.Add(target);
+            node.trueOutputs.Add(target);
         }
-
         graph.Add(node);
 
         await Node.AlignNodesByForceDirected(graph);
