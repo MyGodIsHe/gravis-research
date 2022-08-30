@@ -23,3 +23,5 @@ MonoBehaviour:
     <MoveKey>k__BackingField: 324
     <MoveDuration>k__BackingField: 0.5
     <MoveEase>k__BackingField: 4
+  uiSettings:
+    <ToggleMenuKey>k__BackingField: 27

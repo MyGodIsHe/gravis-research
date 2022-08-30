@@ -9,6 +9,7 @@ namespace Installers
     {
         [SerializeField] private ColorSettings colorSettings;
         [SerializeField] private NavigationSettings navigationSettings;
+        [SerializeField] private UISettings uiSettings;
 
         public override void InstallBindings()
         {
@@ -18,6 +19,10 @@ namespace Installers
 
             Container
                 .BindInstance(navigationSettings)
+                .AsSingle();
+
+            Container
+                .BindInstance(uiSettings)
                 .AsSingle();
         }
     }

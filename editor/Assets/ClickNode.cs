@@ -5,9 +5,10 @@ using UnityEngine;
 
 public class ClickNode : MonoBehaviour
 {
+    public event Action OnNodeSelected = () => { };
+    public event Action OnNodeDeselected = () => { };
+    
     public static ClickNode instance;
-    public Action OnNodeSelected;
-    public Action OnNodeDeselected;
     public GameObject node;
     
     private void Awake()
@@ -27,14 +28,14 @@ public class ClickNode : MonoBehaviour
                 if (hit.transform.name != null)
                 {
                     node = hit.transform.gameObject;
-                    OnNodeSelected?.Invoke();
+                    OnNodeSelected.Invoke();
                 }       
             
             }
             else
             {
                 node = null;
-                OnNodeDeselected?.Invoke();
+                OnNodeDeselected.Invoke();
             }
         }
     }
