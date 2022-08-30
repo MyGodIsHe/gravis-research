@@ -531,6 +531,9 @@ MonoBehaviour:
           m_BoolArgument: 0
         m_CallState: 2
   colorSelected: {r: 0, g: 0, b: 0, a: 0}
+  initColor: {r: 0, g: 0, b: 0, a: 0}
+  applyButon: {fileID: 908229281}
+  cancelButon: {fileID: 1567918467}
 --- !u!1 &170076733
 GameObject:
   m_ObjectHideFlags: 0
@@ -3168,6 +3171,9 @@ MonoBehaviour:
           m_BoolArgument: 0
         m_CallState: 2
   colorSelected: {r: 0, g: 0, b: 0, a: 0}
+  initColor: {r: 0, g: 0, b: 0, a: 0}
+  applyButon: {fileID: 0}
+  cancelButon: {fileID: 0}
 --- !u!1 &888538548
 GameObject:
   m_ObjectHideFlags: 0
