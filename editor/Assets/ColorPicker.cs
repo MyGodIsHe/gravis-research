@@ -12,6 +12,7 @@ public class ColorPicker : MonoBehaviour
 {
     public SettingsView settingsView;
     public GameObject FadeScreen;
+
     public ColorEvent OnColorPreview;
     public ColorEvent OnColorSelect;
     RectTransform Rect;
@@ -20,13 +21,24 @@ public class ColorPicker : MonoBehaviour
 
     public Color colorSelected;
 
+    public Color initColor;
+    
+    [Header("Buttons")]
+    public Button applyButon;
+    public Button cancelButon;
+
     private void OnEnable()
     {
+        initColor = settingsView.buttonClicked.transform.GetChild(0).GetComponent<Image>().color;
         //OnColorPreview(settingsView.buttonClicked.GetComponent<Image>().color);
        // FadeScreen.SetActive(true);
+       applyButon.onClick.AddListener(SetNewColor);
+       cancelButon.onClick.AddListener(SetPrevColor);
     }
     private void OnDisable() {
         //FadeScreen.SetActive(false);
+        applyButon.onClick.RemoveListener(SetNewColor);
+       cancelButon.onClick.RemoveListener(SetPrevColor);
     }
 
     void Start()
@@ -40,6 +52,7 @@ public class ColorPicker : MonoBehaviour
     {
         //RaycastHit ray;
         //if(Physics.Raycast())
+        //if(Input.GetMouseButtonDown(0))
         if(RectTransformUtility.RectangleContainsScreenPoint(Rect, Input.mousePosition))
         {
             Vector2 delta;
@@ -58,16 +71,26 @@ public class ColorPicker : MonoBehaviour
             Color color = ColorTexture.GetPixel(texX, texY);
 
             //OnColorPreview?.Invoke(color);
-            colorSelected = color;
+            //colorSelected = color;
             ColorButton();
 
             if(Input.GetMouseButtonDown(0))
             {
                 //OnColorSelect?.Invoke(color);
                 colorSelected = color;
-                ColorButton();
+                //ColorButton();
             }
         }
+    }
+    
+    public void SetPrevColor()
+    {
+        settingsView.buttonClicked.transform.GetChild(0).GetComponent<Image>().color = initColor;
+    }
+
+    public void SetNewColor()
+    {
+        settingsView.buttonClicked.transform.GetChild(0).GetComponent<Image>().color = colorSelected;
     }
 
     public void ColorButton()
