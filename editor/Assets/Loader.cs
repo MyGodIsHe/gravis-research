@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using System.Threading.Tasks;
 using UnityEngine;
 using Antlr4.Runtime;
 using Antlr4.Runtime.Tree;
@@ -7,7 +8,7 @@ public class Loader : MonoBehaviour
 {
     public string filePath;
 
-    public async void Load()
+    public async Task Load()
     {
         var stream = CharStreams.fromPath(filePath);
         var lexer = new GravisLexer(stream);

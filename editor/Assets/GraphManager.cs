@@ -1,5 +1,6 @@
 using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using Nodes.Enums;
@@ -10,11 +11,14 @@ public class GraphManager : MonoBehaviour
     public GameObject cubeNode;
 
     private static GraphManager singltone;
-    private List<List<Node>> parts;
+    private List<List<Node>> parts = new List<List<Node>>();
     private Volume volume;
     public Material lineMaterial;
     public LineArrow lr;
     public List<GameObject> LineObjectList;
+    
+    
+    private readonly List<NodeView> _views = new List<NodeView>(); 
 
     public static GraphManager Get()
     {
@@ -41,6 +45,22 @@ public class GraphManager : MonoBehaviour
         volume.CenterCamera();
     }
 
+    public IEnumerable<Node> GetNodes()
+    {
+        var nodes = parts.SelectMany(value => value);
+        return nodes;
+    }
+
+    public void Clear()
+    {
+        ClickNode.instance.node = null;
+        
+        _views.ForEach(value => Destroy(value.gameObject));
+        _views.Clear();
+        
+        parts.Clear();
+    }
+
     public List<List<Node>> GetParts()
     {
         return parts;
@@ -54,12 +74,17 @@ public class GraphManager : MonoBehaviour
         {
             var position = (node.position + new Vector3(0, 0, offset)) * 2;
             position.y = -position.y;
+            
             node.gameObject = Instantiate(cubeNode, position, Quaternion.identity);
+            
             var view = node.gameObject.GetComponent<NodeView>();
             view.nodeLink = node;
+            _views.Add(view);
+            
             volume.Add(node.gameObject);
             view.SetText(node.text);
             definitions[node] = node.gameObject;
+            
             foreach (var input_node in node.inputs)
                 links.Add((from: input_node, to: node));
             foreach (var output_node in node.outputs)
