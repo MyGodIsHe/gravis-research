@@ -17,9 +17,16 @@ public class ChangeColor : MonoBehaviour
         }
         mesh.material.color = DeselectColor;
     }
-    private void OnEnable() {
+    private void OnEnable() 
+    {
         ClickNode.instance.OnNodeSelected += ChangeColorOnSelected;
         ClickNode.instance.OnNodeDeselected += ChangeColorOnDeselected;
+    }
+
+    private void OnDisable()
+    {
+        ClickNode.instance.OnNodeSelected -= ChangeColorOnSelected;
+        ClickNode.instance.OnNodeDeselected -= ChangeColorOnDeselected;
     }
 
     void ChangeColorOnSelected()
