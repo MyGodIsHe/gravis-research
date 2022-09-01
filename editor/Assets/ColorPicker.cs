@@ -29,7 +29,7 @@ public class ColorPicker : MonoBehaviour
 
     private void OnEnable()
     {
-        initColor = settingsView.buttonClicked.transform.GetChild(0).GetComponent<Image>().color;
+        //initColor = settingsView.buttonClicked.GetComponent<ColorButton>().initColor;
         //OnColorPreview(settingsView.buttonClicked.GetComponent<Image>().color);
        // FadeScreen.SetActive(true);
        applyButon.onClick.AddListener(SetNewColor);
