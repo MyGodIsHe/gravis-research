@@ -10,65 +10,66 @@ public class SettingsView : MonoBehaviour
 
     public Toggle FogButton;
     public Toggle OrientationButton;
+    public Dropdown ResolutionDropdown;
     public Button LineColorButton;
     public Button CubeSelectColorButton;
     public Button NodeColorButton;
     public Button FontColorButton;
     public Button BackgroundColorButton;
+    public Resolution[] resolutions;
 
     public bool isFogOn = false;
 
     public GameObject buttonClicked;
+    
+    private void Start() {
+        resolutions = Screen.resolutions;
 
+        ResolutionDropdown.ClearOptions();
 
-    private void OnEnable() {
-        //FogButton.onValueChanged.AddListener(FogButton);
+        List<string> options = new List<string>();
+        int currentResolutionIndex = 0;
+        for (int i = 0; i < resolutions.Length; i++)
+        {
+            string option = resolutions[i].width + " x " + resolutions[i].height;
+            options.Add(option);
+
+            if(resolutions[i].width == Screen.currentResolution.width &&
+               resolutions[i].height == Screen.currentResolution.height)
+            {
+                currentResolutionIndex = i;
+            }
+        }
+        ResolutionDropdown.AddOptions(options);
+        ResolutionDropdown.value = currentResolutionIndex;
+        ResolutionDropdown.RefreshShownValue();
     }
     
     void Update()
     {
         FogSwitch();
-        ScreenModeChange();
     }
 
     public void FogSwitch()
     {
         if(FogButton.isOn)
         {
-            //Fog switch on
-            Debug.Log("fog is on");
             RenderSettings.fog = true;
-            //LightingSettings.Environment.fog = true;
         }
         else
         {
-            //Fog switch off
-            Debug.Log("fog is off");
             RenderSettings.fog = false;
         }
     }
 
-    public void CubeColorOnSelected()
+    public void SetFullscreen(bool isFullscreen)
     {
-        //changeColor.SelectColor
+        Screen.fullScreen = isFullscreen;
     }
 
-    public void ScreenModeChange()
+    public void SetResolution(int ResolutionIndex)
     {
-        Screen.fullScreen = OrientationButton.isOn;
-        if(OrientationButton.isOn)
-        {
-            //Screen.fullScreen;
-        }
-
-        else
-        {
-            //landscape orientation
-        }
-    }
-
-    public void GetButtonClicked()
-    {
-        //buttonClicked = 
+        Resolution resolution = resolutions[ResolutionIndex];
+        Screen.SetResolution(resolution.width, resolution.height, Screen.fullScreen);
     }
 }
