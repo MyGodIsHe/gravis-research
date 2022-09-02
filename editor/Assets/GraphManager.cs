@@ -27,8 +27,8 @@ public class GraphManager : MonoBehaviour
 
     public async Task Init(List<Node> sceneNodes)
     {
-        //settingsParams = GetComponent<SettingsParams>();
-        //Camera.main.backgroundColor = settingsParams.BgColor;
+        settingsParams = GetComponent<SettingsParams>();
+        Camera.main.backgroundColor = settingsParams.BgColor;
         volume = new Volume();
         parts = Node.FindIsolatedGraphs(sceneNodes);
         for (var i = 0; i < parts.Count; i++)

@@ -1984,8 +1984,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 8492ddb8286d4224686a889e8b70898e, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  target: {x: -0.1344409, y: -2.976099, z: 1.3785503}
-  distance: 15.099237
+  target: {x: -0.123429775, y: -3.0060377, z: -1.9203761}
+  distance: 15.092142
   xSpeed: 20
   ySpeed: 20
   yMinLimit: -85
