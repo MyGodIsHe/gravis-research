@@ -8,6 +8,7 @@ public class GraphManager : MonoBehaviour
     public GameObject cubeNode;
 
     private static GraphManager singltone;
+    private SettingsParams settingsParams;
     private List<List<Node>> parts;
     private Volume volume;
     public Material lineMaterial;
@@ -26,6 +27,8 @@ public class GraphManager : MonoBehaviour
 
     public async Task Init(List<Node> sceneNodes)
     {
+        //settingsParams = GetComponent<SettingsParams>();
+        //Camera.main.backgroundColor = settingsParams.BgColor;
         volume = new Volume();
         parts = Node.FindIsolatedGraphs(sceneNodes);
         for (var i = 0; i < parts.Count; i++)
@@ -103,6 +106,7 @@ public class GraphManager : MonoBehaviour
         }
         var lineRend = LineObject.GetComponent<LineRenderer>();
         lineRend.material = lineMaterial;
+        //lineRend.material.color = settingsParams.lineColor;
         lineRend.widthMultiplier = 0.1f;
         lineRend.positionCount = 0;
         
