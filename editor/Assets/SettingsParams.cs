@@ -5,6 +5,7 @@ using UnityEngine.UI;
 
 public class SettingsParams : MonoBehaviour
 {
+    private static SettingsParams settings;
     public Color nodeColor;
     public Color nodeColorOnSelected;
     public Color lineColor;
@@ -16,6 +17,23 @@ public class SettingsParams : MonoBehaviour
     public Image lineColorImage;
     public Image fontColorImage;
     public Image BgColorImage;
+
+    public static SettingsParams Get()
+    {
+        if (settings is null)
+        {
+            var gameObject = GameObject.Find("GRAPH_MANAGER");
+            settings = gameObject.GetComponentInChildren<SettingsParams>();
+        }
+        return settings;
+    }
+    
+    private void Awake() {
+        if(settings == null)
+        {
+            settings = this;
+        }
+    }
 
     public SettingsView settingsView;
 
