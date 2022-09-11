@@ -16,6 +16,7 @@ public class SettingsView : MonoBehaviour
     public Button NodeColorButton;
     public Button FontColorButton;
     public Button BackgroundColorButton;
+    public Button saveButton;
     public Resolution[] resolutions;
 
     public bool isFogOn = false;

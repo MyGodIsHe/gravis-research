@@ -27,9 +27,12 @@ public class LoadMenu : MonoBehaviour
     public void Deactivate()
     {
         gameObject.SetActive(false);
-        foreach (Transform child in scrollContent.transform)
+        if(gameObject.name != "SettingsMenu")
         {
-            Destroy(child.gameObject);
+            foreach (Transform child in scrollContent.transform)
+            {
+                Destroy(child.gameObject);
+            }
         }
     }
 }
