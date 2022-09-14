@@ -9,6 +9,7 @@ using System.Runtime.Serialization.Formatters.Binary;
 public class SettingsParams : MonoBehaviour
 {
     private static SettingsParams settings;
+    public INIParser iniParser;
     public Color nodeColor;
     public Color nodeColorOnSelected;
     public Color lineColor;
@@ -69,21 +70,27 @@ public class SettingsParams : MonoBehaviour
 
     public void SaveSettings()
     {
-        var settingsSave = new IniParser(@"Assets/Settings.ini");
-        settingsSave.Write("Fog", settingsView.FogButton.isOn.ToString());
-        settingsSave.Write("isFullscreen", settingsView.OrientationButton.isOn.ToString());
-        settingsSave.Write("ColorSelectedNode", ColorToString(settingsView.CubeSelectColorButton.targetGraphic.color));
-        settingsSave.Write("ColorNode", ColorToString(settingsView.NodeColorButton.targetGraphic.color));
-        settingsSave.Write("ColorLine", ColorToString(settingsView.LineColorButton.targetGraphic.color));
-        settingsSave.Write("ColorFont", ColorToString(settingsView.FontColorButton.targetGraphic.color));
-        settingsSave.Write("ColorBg", ColorToString(settingsView.BackgroundColorButton.targetGraphic.color));
-        settingsSave.Write("Resolution", settingsView.ResolutionDropdown.value.ToString());
+        //var settingsSave = new IniParser(@"Assets/Settings.ini");
+        iniParser = new INIParser();
+        iniParser.Open(Application.persistentDataPath + "Settings.ini");
+        iniParser.WriteValue("GlobalSettings", "Fog", settingsView.FogButton.isOn.ToString());
+        iniParser.WriteValue("GlobalSettings", "isFullscreen", settingsView.OrientationButton.isOn.ToString());
+        iniParser.WriteValue("GlobalSettings", "ColorSelectedNode", ColorToString(settingsView.CubeSelectColorButton.targetGraphic.color));
+        iniParser.WriteValue("GlobalSettings", "ColorNode", ColorToString(settingsView.NodeColorButton.targetGraphic.color));
+        iniParser.WriteValue("GlobalSettings", "ColorLine", ColorToString(settingsView.LineColorButton.targetGraphic.color));
+        iniParser.WriteValue("GlobalSettings", "ColorFont", ColorToString(settingsView.FontColorButton.targetGraphic.color));
+        iniParser.WriteValue("GlobalSettings", "ColorBg", ColorToString(settingsView.BackgroundColorButton.targetGraphic.color));
+        iniParser.WriteValue("GlobalSettings", "Resolution", settingsView.ResolutionDropdown.value.ToString());
+        iniParser.Close();
     }
 
     public void LoadSettings()
     {   
+        iniParser = new INIParser();
+        iniParser.Open(Application.persistentDataPath + "Settings.ini");
         //var settingsSave = Resources.Load("Settings.ini");
-        var settingsSave = new IniParser(@"Assets/Settings.ini");
+        //var settingsSave = new IniParser(@"Assets/Settings.ini");
+        //var settingsSave = File.ReadAllText("Assets/Settings.ini") as TextAsset;
         //string destination = "Assets/Settings.ini";
         //FileStream file;
 
@@ -104,14 +111,14 @@ public class SettingsParams : MonoBehaviour
         
         //file.Close();
         //Debug.Log(settingsSave.Read("Fog"));
-        settingsView.FogButton.isOn = System.Convert.ToBoolean(settingsSave.Read("Fog"));
-        settingsView.ResolutionDropdown.value = int.Parse(settingsSave.Read("Resolution"));
-        settingsView.OrientationButton.isOn = System.Convert.ToBoolean(settingsSave.Read("isFullscreen"));
-        settingsView.CubeSelectColorButton.targetGraphic.color = VectorFromString(settingsSave.Read("ColorSelectedNode"));
-        settingsView.NodeColorButton.targetGraphic.color = VectorFromString(settingsSave.Read("ColorNode"));
-        settingsView.LineColorButton.targetGraphic.color = VectorFromString(settingsSave.Read("ColorLine"));
-        settingsView.FontColorButton.targetGraphic.color = VectorFromString(settingsSave.Read("ColorFont"));
-        settingsView.BackgroundColorButton.targetGraphic.color = VectorFromString(settingsSave.Read("ColorBg"));       
+        settingsView.FogButton.isOn = System.Convert.ToBoolean(iniParser.ReadValue("GlobalSettings", "Fog", "true"));
+        //settingsView.ResolutionDropdown.value = int.Parse(iniParser.ReadValue("GlobalSettings", "Resolution", "0"));
+        settingsView.OrientationButton.isOn = System.Convert.ToBoolean(iniParser.ReadValue("GlobalSettings", "isFullscreen", "true"));
+        settingsView.CubeSelectColorButton.targetGraphic.color = VectorFromString(iniParser.ReadValue("GlobalSettings", "ColorSelectedNode","0/0/0/1"));
+        settingsView.NodeColorButton.targetGraphic.color = VectorFromString(iniParser.ReadValue("GlobalSettings", "ColorNode", "1/1/1/1"));
+        settingsView.LineColorButton.targetGraphic.color = VectorFromString(iniParser.ReadValue("GlobalSettings", "ColorLine", "1/0/0/1"));
+        settingsView.FontColorButton.targetGraphic.color = VectorFromString(iniParser.ReadValue("GlobalSettings", "ColorFont", "1/1/0/1"));
+        settingsView.BackgroundColorButton.targetGraphic.color = VectorFromString(iniParser.ReadValue("GlobalSettings", "ColorBg", "0/0/1/1"));       
     }
 
     private Vector4 VectorFromString(string savedColor)
