@@ -44,9 +44,12 @@ public class SettingsParams : MonoBehaviour
             print("ini");
         }
         //var set = 
-        LoadSettings();
+        
 
         
+    }
+    private void Start() {
+        LoadSettings();
     }
 
     public SettingsView settingsView;
@@ -112,7 +115,7 @@ public class SettingsParams : MonoBehaviour
         //file.Close();
         //Debug.Log(settingsSave.Read("Fog"));
         settingsView.FogButton.isOn = System.Convert.ToBoolean(iniParser.ReadValue("GlobalSettings", "Fog", "true"));
-        //settingsView.ResolutionDropdown.value = int.Parse(iniParser.ReadValue("GlobalSettings", "Resolution", "0"));
+        settingsView.ResolutionDropdown.value = int.Parse(iniParser.ReadValue("GlobalSettings", "Resolution", "0"));
         settingsView.OrientationButton.isOn = System.Convert.ToBoolean(iniParser.ReadValue("GlobalSettings", "isFullscreen", "true"));
         settingsView.CubeSelectColorButton.targetGraphic.color = VectorFromString(iniParser.ReadValue("GlobalSettings", "ColorSelectedNode","0/0/0/1"));
         settingsView.NodeColorButton.targetGraphic.color = VectorFromString(iniParser.ReadValue("GlobalSettings", "ColorNode", "1/1/1/1"));
