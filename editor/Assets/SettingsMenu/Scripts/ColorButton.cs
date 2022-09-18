@@ -22,11 +22,6 @@ public class ColorButton : MonoBehaviour
         settingsView.BackgroundColorButton.GetComponent<ColorPreview>().previewGraphic = null;
     }
 
-    void Update()
-    {
-        //SetButtonClicked();
-    }
-
     public void SwitchColorPicker()
     {
         colorPic.gameObject.SetActive(!colorPicker.gameObject.activeSelf);
@@ -35,14 +30,12 @@ public class ColorButton : MonoBehaviour
     public void ActiveColorPicker()
     {
         colorPic.gameObject.SetActive(true);
-        colorPicker.FadeScreen.SetActive(true);
         GetComponent<ColorPreview>().previewGraphic = transform.GetChild(0).GetComponent<Image>();
     }
 
     public void DisableColorPicker()
     {
         colorPic.gameObject.SetActive(false);
-        colorPicker.FadeScreen.SetActive(false);
         settingsView.LineColorButton.GetComponent<ColorPreview>().previewGraphic = null;
         settingsView.NodeColorButton.GetComponent<ColorPreview>().previewGraphic = null;
         settingsView.FontColorButton.GetComponent<ColorPreview>().previewGraphic = null;
@@ -59,7 +52,6 @@ public class ColorButton : MonoBehaviour
     public void SetInitColor()
     {
         initColor = transform.GetChild(0).GetComponent<Image>().color;
-        colorPicker.initColor = initColor;
     }
 
     
