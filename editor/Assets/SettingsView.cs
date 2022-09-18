@@ -73,4 +73,9 @@ public class SettingsView : MonoBehaviour
         Resolution resolution = resolutions[ResolutionIndex];
         Screen.SetResolution(resolution.width, resolution.height, Screen.fullScreen);
     }
+
+    public void InitColor()
+    {
+        buttonClicked.GetComponent<ColorPreview>().previewGraphic.color = buttonClicked.GetComponent<ColorButton>().initColor;
+    }
 }
