@@ -1,6 +1,9 @@
 using System.Collections.Generic;
+using System.IO;
+using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
+using Nodes.Enums;
 using UnityEngine;
 
 public class GraphManager : MonoBehaviour
@@ -8,16 +11,14 @@ public class GraphManager : MonoBehaviour
     public GameObject cubeNode;
 
     private static GraphManager singltone;
-    private SettingsParams settingsParams;
-    private List<List<Node>> parts;
+    private List<List<Node>> parts = new List<List<Node>>();
     private Volume volume;
     public Material lineMaterial;
     public LineArrow lr;
     public List<GameObject> LineObjectList;
-
-    private void Awake() {
-        settingsParams = GetComponent<SettingsParams>();
-    }
+    
+    
+    private readonly List<NodeView> _views = new List<NodeView>(); 
 
     public static GraphManager Get()
     {
@@ -31,9 +32,6 @@ public class GraphManager : MonoBehaviour
 
     public async Task Init(List<Node> sceneNodes)
     {
-        
-        Camera.main.backgroundColor = settingsParams.BgColor;
-        
         volume = new Volume();
         parts = Node.FindIsolatedGraphs(sceneNodes);
         for (var i = 0; i < parts.Count; i++)
@@ -45,6 +43,22 @@ public class GraphManager : MonoBehaviour
         }
 
         volume.CenterCamera();
+    }
+
+    public IEnumerable<Node> GetNodes()
+    {
+        var nodes = parts.SelectMany(value => value);
+        return nodes;
+    }
+
+    public void Clear()
+    {
+        ClickNode.instance.node = null;
+        
+        _views.ForEach(value => Destroy(value.gameObject));
+        _views.Clear();
+        
+        parts.Clear();
     }
 
     public List<List<Node>> GetParts()
@@ -60,13 +74,17 @@ public class GraphManager : MonoBehaviour
         {
             var position = (node.position + new Vector3(0, 0, offset)) * 2;
             position.y = -position.y;
+            
             node.gameObject = Instantiate(cubeNode, position, Quaternion.identity);
-            node.gameObject.GetComponent<MeshRenderer>().material.color = settingsParams.nodeColor;
+            
             var view = node.gameObject.GetComponent<NodeView>();
             view.nodeLink = node;
+            _views.Add(view);
+            
             volume.Add(node.gameObject);
             view.SetText(node.text);
             definitions[node] = node.gameObject;
+            
             foreach (var input_node in node.inputs)
                 links.Add((from: input_node, to: node));
             foreach (var output_node in node.outputs)
@@ -76,10 +94,18 @@ public class GraphManager : MonoBehaviour
             LineTo(definitions[from], definitions[to]);
     }
 
-    public async Task LinkNode(Node node, Node target, List<Node> graph)
+    public async Task LinkNode(Node node, Node target, List<Node> graph, ENodeForce force)
     {
-        target.outputs.Add(node);
-        node.inputs.Add(target);
+        if (force == ENodeForce.Out)
+        {
+            target.trueOutputs.Add(node);
+            node.inputs.Add(target);
+        }
+        else
+        {
+            target.inputs.Add(node);
+            node.trueOutputs.Add(target);
+        }
         graph.Add(node);
 
         await Node.AlignNodesByForceDirected(graph);
@@ -112,7 +138,6 @@ public class GraphManager : MonoBehaviour
         }
         var lineRend = LineObject.GetComponent<LineRenderer>();
         lineRend.material = lineMaterial;
-        lineRend.material.color = settingsParams.lineColor;
         lineRend.widthMultiplier = 0.1f;
         lineRend.positionCount = 0;
         
@@ -132,7 +157,6 @@ public class GraphManager : MonoBehaviour
         _stop.transform.Translate(Vector3.forward*0.8f, Space.Self);
         lineRend.SetPosition(lineRend.positionCount - 1, _stop.transform.position);   
         lr.ArrowPoint(stop.gameObject, _stop.gameObject, start.gameObject);
-        lr.arrow.GetComponentInChildren<MeshRenderer>().sharedMaterial.color = settingsParams.lineColor;
         Destroy(_stop);
     }
 
