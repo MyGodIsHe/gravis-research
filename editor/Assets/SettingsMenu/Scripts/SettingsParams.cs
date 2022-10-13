@@ -54,14 +54,6 @@ public class SettingsParams : MonoBehaviour
 
     public SettingsView settingsView;
 
-    /*private void OnEnable() {
-        nodeColorImage = settingsView.NodeColorButton.GetComponentInChildren<Image>();
-        nodeSelColorImage = settingsView.CubeSelectColorButton.GetComponentInChildren<Image>();
-        lineColorImage = settingsView.LineColorButton.GetComponentInChildren<Image>();
-        fontColorImage = settingsView.FontColorButton.GetComponentInChildren<Image>();
-        BgColorImage = settingsView.BackgroundColorButton.GetComponentInChildren<Image>();
-    }*/
-
     void Update()
     {
         nodeColor = nodeColorImage.color;
@@ -69,6 +61,8 @@ public class SettingsParams : MonoBehaviour
         lineColor = lineColorImage.color;
         fontColor = fontColorImage.color;
         BgColor = BgColorImage.color;
+
+        //settingsView.ResolutionDropdown.value = int.Parse(iniParser.ReadValue("GlobalSettings", "Resolution", "0"));
     }
 
     public void SaveSettings()
@@ -115,13 +109,14 @@ public class SettingsParams : MonoBehaviour
         //file.Close();
         //Debug.Log(settingsSave.Read("Fog"));
         settingsView.FogButton.isOn = System.Convert.ToBoolean(iniParser.ReadValue("GlobalSettings", "Fog", "true"));
-        settingsView.ResolutionDropdown.value = int.Parse(iniParser.ReadValue("GlobalSettings", "Resolution", "0"));
+        
         settingsView.OrientationButton.isOn = System.Convert.ToBoolean(iniParser.ReadValue("GlobalSettings", "isFullscreen", "true"));
         settingsView.CubeSelectColorButton.targetGraphic.color = VectorFromString(iniParser.ReadValue("GlobalSettings", "ColorSelectedNode","0/0/0/1"));
         settingsView.NodeColorButton.targetGraphic.color = VectorFromString(iniParser.ReadValue("GlobalSettings", "ColorNode", "1/1/1/1"));
         settingsView.LineColorButton.targetGraphic.color = VectorFromString(iniParser.ReadValue("GlobalSettings", "ColorLine", "1/0/0/1"));
         settingsView.FontColorButton.targetGraphic.color = VectorFromString(iniParser.ReadValue("GlobalSettings", "ColorFont", "1/1/0/1"));
         settingsView.BackgroundColorButton.targetGraphic.color = VectorFromString(iniParser.ReadValue("GlobalSettings", "ColorBg", "0/0/1/1"));       
+        settingsView.ResolutionDropdown.value = int.Parse(iniParser.ReadValue("GlobalSettings", "Resolution", "0"));
     }
 
     private Vector4 VectorFromString(string savedColor)
