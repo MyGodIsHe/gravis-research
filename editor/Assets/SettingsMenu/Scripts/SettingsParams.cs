@@ -77,7 +77,7 @@ public class SettingsParams : MonoBehaviour
         iniParser.WriteValue("GlobalSettings", "ColorLine", ColorToString(settingsView.LineColorButton.targetGraphic.color));
         iniParser.WriteValue("GlobalSettings", "ColorFont", ColorToString(settingsView.FontColorButton.targetGraphic.color));
         iniParser.WriteValue("GlobalSettings", "ColorBg", ColorToString(settingsView.BackgroundColorButton.targetGraphic.color));
-        //iniParser.WriteValue("GlobalSettings", "Resolution", settingsView.ResolutionDropdown.value.ToString());
+        iniParser.WriteValue("GlobalSettings", "Resolution", settingsView.ResolutionDropdown.value.ToString());
         iniParser.Close();
     }
 
@@ -116,7 +116,7 @@ public class SettingsParams : MonoBehaviour
         settingsView.LineColorButton.targetGraphic.color = VectorFromString(iniParser.ReadValue("GlobalSettings", "ColorLine", "1/0/0/1"));
         settingsView.FontColorButton.targetGraphic.color = VectorFromString(iniParser.ReadValue("GlobalSettings", "ColorFont", "1/1/0/1"));
         settingsView.BackgroundColorButton.targetGraphic.color = VectorFromString(iniParser.ReadValue("GlobalSettings", "ColorBg", "0/0/1/1"));       
-        //settingsView.ResolutionDropdown.value = int.Parse(iniParser.ReadValue("GlobalSettings", "Resolution", "0"));
+        settingsView.ResolutionDropdown.value = int.Parse(iniParser.ReadValue("GlobalSettings", "Resolution", "0"));
     }
 
     private Vector4 VectorFromString(string savedColor)
