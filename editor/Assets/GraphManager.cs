@@ -11,6 +11,7 @@ public class GraphManager : MonoBehaviour
     public GameObject cubeNode;
 
     private static GraphManager singltone;
+    public SettingsParams settingsParams;
     private List<List<Node>> parts = new List<List<Node>>();
     private Volume volume;
     public Material lineMaterial;
@@ -19,6 +20,10 @@ public class GraphManager : MonoBehaviour
     
     
     private readonly List<NodeView> _views = new List<NodeView>(); 
+
+    private void Awake() {
+        settingsParams = GetComponent<SettingsParams>();
+    }
 
     public static GraphManager Get()
     {
@@ -32,6 +37,7 @@ public class GraphManager : MonoBehaviour
 
     public async Task Init(List<Node> sceneNodes)
     {
+        Camera.main.backgroundColor = settingsParams.BgColor;
         volume = new Volume();
         parts = Node.FindIsolatedGraphs(sceneNodes);
         for (var i = 0; i < parts.Count; i++)
@@ -76,7 +82,7 @@ public class GraphManager : MonoBehaviour
             position.y = -position.y;
             
             node.gameObject = Instantiate(cubeNode, position, Quaternion.identity);
-            
+            node.gameObject.GetComponent<MeshRenderer>().material.color = settingsParams.nodeColor;
             var view = node.gameObject.GetComponent<NodeView>();
             view.nodeLink = node;
             _views.Add(view);
@@ -138,6 +144,7 @@ public class GraphManager : MonoBehaviour
         }
         var lineRend = LineObject.GetComponent<LineRenderer>();
         lineRend.material = lineMaterial;
+        lineRend.material.color = settingsParams.lineColor;
         lineRend.widthMultiplier = 0.1f;
         lineRend.positionCount = 0;
         
@@ -157,6 +164,7 @@ public class GraphManager : MonoBehaviour
         _stop.transform.Translate(Vector3.forward*0.8f, Space.Self);
         lineRend.SetPosition(lineRend.positionCount - 1, _stop.transform.position);   
         lr.ArrowPoint(stop.gameObject, _stop.gameObject, start.gameObject);
+        lr.arrow.GetComponentInChildren<MeshRenderer>().sharedMaterial.color = settingsParams.lineColor;
         Destroy(_stop);
     }
 
