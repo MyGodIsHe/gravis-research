@@ -16,6 +16,8 @@ using Zenject;
 [AddComponentMenu("Camera-Control/Mouse Orbit with zoom")]
 public class DragMouseOrbit : MonoBehaviour
 {
+    public GameObject settingsMenu;
+    public GameObject mainMenu;
 
     public Vector3 target;
     public float distance = 5.0f;
@@ -129,6 +131,16 @@ public class DragMouseOrbit : MonoBehaviour
                 }
             }
 ;        }
+
+        if (Input.GetKeyDown(KeyCode.Escape))
+        {
+            if(settingsMenu.activeSelf)
+            {
+                settingsMenu.SetActive(false);
+                mainMenu.SetActive(true);
+            }
+            
+        }
     }
 
     public static async void CreateNode(NodeType type, string text, Node target, ENodeForce force)
