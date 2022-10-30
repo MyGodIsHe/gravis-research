@@ -23,7 +23,7 @@ public class SettingsView : MonoBehaviour
 
     public GameObject buttonClicked;
     
-    private void Start() {
+    private void OnEnable() {
         resolutions = Screen.resolutions;
 
         ResolutionDropdown.ClearOptions();
@@ -68,11 +68,11 @@ public class SettingsView : MonoBehaviour
         Screen.fullScreen = isFullscreen;
     }
 
-    public void SetResolution(int ResolutionIndex)
+    /*public void SetResolution(int ResolutionIndex)
     {
         Resolution resolution = resolutions[ResolutionIndex];
         Screen.SetResolution(resolution.width, resolution.height, Screen.fullScreen);
-    }
+    }*/
 
     public void InitColor()
     {
