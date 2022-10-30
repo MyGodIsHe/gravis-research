@@ -2281,7 +2281,7 @@ PrefabInstance:
     - target: {fileID: 8666135763136827368, guid: bf15331e97562a445876d1e61d43d0bb,
         type: 3}
       propertyPath: m_Options.m_Options.Array.data[1].m_Text
-      value: 1366 x 769
+      value: 1366 x 768
       objectReference: {fileID: 0}
     - target: {fileID: 8666135763136827369, guid: bf15331e97562a445876d1e61d43d0bb,
         type: 3}
