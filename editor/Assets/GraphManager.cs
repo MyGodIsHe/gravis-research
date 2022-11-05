@@ -9,6 +9,7 @@ using UnityEngine;
 public class GraphManager : MonoBehaviour
 {
     public GameObject cubeNode;
+    public GameObject mainMenu;
 
     private static GraphManager singltone;
     public SettingsParams settingsParams;
@@ -38,6 +39,7 @@ public class GraphManager : MonoBehaviour
     public async Task Init(List<Node> sceneNodes)
     {
         Camera.main.backgroundColor = settingsParams.BgColor;
+        mainMenu.SetActive(false);
         volume = new Volume();
         parts = Node.FindIsolatedGraphs(sceneNodes);
         for (var i = 0; i < parts.Count; i++)
