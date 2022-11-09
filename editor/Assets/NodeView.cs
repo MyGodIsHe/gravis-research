@@ -4,6 +4,7 @@ using UnityEngine;
 public class NodeView : MonoBehaviour
 {
     public Node nodeLink;
+    public SettingsParams settingsParams;
     
     [SerializeField] private Transform origin;
     [SerializeField] private TextMeshPro text;
@@ -16,6 +17,11 @@ public class NodeView : MonoBehaviour
     public void SetText(string value)
     {
         text.text = value;
+        text.color = settingsParams.fontColor;
+    }
+
+    private void Awake() {
+        settingsParams = GameObject.Find("GRAPH_MANAGER").GetComponent<SettingsParams>();
     }
 
     private void Update()

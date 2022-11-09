@@ -62,10 +62,12 @@ public class LoadMenu : MonoBehaviour
         {
             button.onClick.RemoveAllListeners();
         }
-        
-        foreach (Transform child in scrollContent.transform)
+        if(gameObject.name != "SettingsMenu" || gameObject.name != "SettingsPanel")
         {
-            Destroy(child.gameObject);
+            foreach (Transform child in scrollContent.transform)
+            {
+                Destroy(child.gameObject);
+            }
         }
     }
 }

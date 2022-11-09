@@ -19,6 +19,10 @@ public class ChangeColor : MonoBehaviour
     }
     private void OnEnable() 
     {
+        var settingsParams = GameObject.Find("GRAPH_MANAGER").GetComponent<SettingsParams>();
+        DeselectColor = settingsParams.nodeColor;
+        SelectColor = settingsParams.nodeColorOnSelected;
+        mesh.material.color = DeselectColor;
         ClickNode.instance.OnNodeSelected += ChangeColorOnSelected;
         ClickNode.instance.OnNodeDeselected += ChangeColorOnDeselected;
     }
