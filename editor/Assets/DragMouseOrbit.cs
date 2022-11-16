@@ -122,7 +122,7 @@ public class DragMouseOrbit : MonoBehaviour
                 {
                     if (_sequence != null && _sequence.IsActive())
                     {
-                        _sequence.Complete();
+                        _sequence.Kill();
                     }
 
                     _sequence = DOTween

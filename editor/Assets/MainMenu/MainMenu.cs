@@ -2,6 +2,7 @@
 using System.Linq;
 using System.Threading.Tasks;
 using Constants;
+using JetBrains.Annotations;
 using SFB;
 using UI;
 using UnityEngine;
@@ -10,6 +11,9 @@ using Zenject;
 
 public class MainMenu : MonoBehaviour
 {
+    [SerializeField] private GameObject mainGroup;
+    [SerializeField] private GameObject performGroup;
+    
     [SerializeField] private Button saveButton;
 
     [SerializeField] private Loader loader;
@@ -65,6 +69,14 @@ public class MainMenu : MonoBehaviour
         }
     }
 
+    [UsedImplicitly]
+    public void Create()
+    {
+        mainGroup.SetActive(false);
+        performGroup.SetActive(true);
+    }
+
+    [UsedImplicitly]
     public async void Load()
     {
         var ex = new[]
@@ -87,6 +99,27 @@ public class MainMenu : MonoBehaviour
             gameObject.SetActive(false);
             _uiController.SetToggleMenuPermission(true);
         }
+    }
+
+    [UsedImplicitly]
+    public async void Perform()
+    {
+        var gm = GraphManager.Get();
+        gm.Clear();
+        
+        await loader.LoadEmpty();
+        
+        gameObject.SetActive(false);
+        _uiController.SetToggleMenuPermission(true);
+
+        Deny();
+    }
+
+    [UsedImplicitly]
+    public void Deny()
+    {
+        mainGroup.SetActive(true);
+        performGroup.SetActive(false);
     }
     
     public void Quit()
