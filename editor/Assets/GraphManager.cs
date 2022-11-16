@@ -30,7 +30,7 @@ public class GraphManager : MonoBehaviour
         return singltone;
     }
 
-    public async Task Init(List<Node> sceneNodes)
+    public async Task Init(List<Node> sceneNodes, bool centerCamera = true, bool normalizeDistance = true)
     {
         volume = new Volume();
         parts = Node.FindIsolatedGraphs(sceneNodes);
@@ -42,7 +42,18 @@ public class GraphManager : MonoBehaviour
             CreateGameObjectsFromNodes(nodes, i, volume);
         }
 
-        volume.CenterCamera();
+        if (!centerCamera && !normalizeDistance) return;
+        
+        var orbit = Camera.main.GetComponent<DragMouseOrbit>();
+        if (centerCamera)
+        {
+            volume.CenterCamera(orbit);
+        }
+
+        if (normalizeDistance)
+        {
+            volume.NormalizeDistance(orbit);   
+        }
     }
 
     public IEnumerable<Node> GetNodes()
@@ -123,7 +134,10 @@ public class GraphManager : MonoBehaviour
         {
             volume.Add(n.gameObject);
         }
-        volume.CenterCamera();
+
+        var orbit = Camera.main.GetComponent<DragMouseOrbit>();
+        volume.CenterCamera(orbit);
+        volume.NormalizeDistance(orbit);
     }
 
     private void LineTo(GameObject start, GameObject stop) 
@@ -238,10 +252,13 @@ class Volume
         return ((Max - Min) / 2).magnitude;
     }
 
-    public void CenterCamera()
+    public void CenterCamera(DragMouseOrbit orbit)
     {
-        var orbit = Camera.main.GetComponent<DragMouseOrbit>();
         orbit.target = GetCenter();
+    }
+
+    public void NormalizeDistance(DragMouseOrbit orbit)
+    {
         orbit.distance = GetRadius() * 2;
     }
 }
