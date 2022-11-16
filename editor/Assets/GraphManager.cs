@@ -80,22 +80,6 @@ public class GraphManager : MonoBehaviour
         parts.Clear();
     }
 
-    public IEnumerable<Node> GetNodes()
-    {
-        var nodes = parts.SelectMany(value => value);
-        return nodes;
-    }
-
-    public void Clear()
-    {
-        ClickNode.instance.node = null;
-        
-        _views.ForEach(value => Destroy(value.gameObject));
-        _views.Clear();
-        
-        parts.Clear();
-    }
-
     public List<List<Node>> GetParts()
     {
         return parts;
