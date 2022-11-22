@@ -60,12 +60,15 @@ public class MainMenu : MonoBehaviour
         {
             File.Delete(path);    
         }
-        
-        var stream = new StreamWriter(path, true);
-        using (stream)
+
+        if (path != string.Empty)
         {
-            var saver = new Saver(stream);
-            await Task.Factory.StartNew(() => saver.Write(nodes));
+            var stream = new StreamWriter(path, true);
+            await using (stream)
+            {
+                var saver = new Saver(stream);
+                await Task.Factory.StartNew(() => saver.Write(nodes));
+            }
         }
     }
 

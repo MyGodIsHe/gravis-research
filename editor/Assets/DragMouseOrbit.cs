@@ -11,6 +11,7 @@ using Settings;
 using UI;
 using UI.Selection;
 using UnityEngine;
+using Utils;
 using Zenject;
 
 [AddComponentMenu("Camera-Control/Mouse Orbit with zoom")]
@@ -134,19 +135,26 @@ public class DragMouseOrbit : MonoBehaviour
 
         if (Input.GetKeyDown(KeyCode.Escape))
         {
-            if(settingsMenu.activeSelf)
+            if (settingsMenu.activeSelf)
             {
                 settingsMenu.SetActive(false);
                 mainMenu.SetActive(true);
             }
-            
+        }
+
+        if (Input.GetKeyDown(KeyCode.Delete))
+        {
+            var parent = ClickNode.instance.node.GetComponent<NodeView>();
+            if (parent != null)
+            {
+                RemoveNode(parent);
+            }
         }
     }
 
     public static async void CreateNode(NodeType type, string text, Node target, ENodeForce force)
     {
         var gm = GraphManager.Get();
-        var pIndex = Random.Range(0, gm.GetParts().Count);
         
         var node = new Node
         {
@@ -160,7 +168,7 @@ public class DragMouseOrbit : MonoBehaviour
             Random.Range(-1f, 1f)
         );
 
-        await gm.LinkNode(node, target, gm.GetParts()[pIndex], force);
+        await gm.LinkNode(node, target, gm.GetParts().GetRandom(), force);
     }
 
     public static float ClampAngle(float angle, float min, float max)
@@ -187,5 +195,15 @@ public class DragMouseOrbit : MonoBehaviour
 
         return Mathf.Clamp(dist - modify, distanceMin, distanceMax);;
     }
-    
+
+    private static void RemoveNode(NodeView view)
+    {
+        var gm = GraphManager.Get();
+        var graph = gm.GetParts().GetRandom();
+
+        if (graph.Count > 1)
+        {
+            gm.RemoveNode(view.nodeLink, graph);
+        }
+    }
 }

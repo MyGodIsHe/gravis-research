@@ -5,6 +5,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using Nodes.Enums;
 using UnityEngine;
+using Utils;
 
 public class GraphManager : MonoBehaviour
 {
@@ -127,10 +128,10 @@ public class GraphManager : MonoBehaviour
             target.inputs.Add(node);
             node.trueOutputs.Add(target);
         }
+        
         graph.Add(node);
 
         await Node.AlignNodesByForceDirected(graph);
-
 
         node.gameObject = Instantiate(cubeNode);
         var view = node.gameObject.GetComponent<NodeView>();
@@ -138,14 +139,41 @@ public class GraphManager : MonoBehaviour
         view.SetText(node.text);
 
         ReDraw(graph);
+        AlignByGraph(graph);
+    }
 
-        volume = new Volume();
-        foreach (var n in graph)
+    public void RemoveNode(Node node, List<Node> graph)
+    {
+        var view = _views.FirstOrDefault(value => value.gameObject == node.gameObject);
+        _views.Remove(view);
+        
+        graph.Remove(node); 
+        graph.ForEach(value => value.AggregateAllRelationships(Perform));
+        
+        Destroy(node.gameObject);
+        
+        ReDraw(graph);
+        AlignByGraph(graph);
+
+        void Perform(Node self, List<Node> list)
         {
-            volume.Add(n.gameObject);
+            if (self == node)
+            {
+                list.Remove(self);
+            }
+        }
+    }
+
+    private static void AlignByGraph(List<Node> graph)
+    {
+        var volume = new Volume();
+        foreach (var node in graph)
+        {
+            volume.Add(node.gameObject);
         }
 
         var orbit = Camera.main.GetComponent<DragMouseOrbit>();
+        
         volume.CenterCamera(orbit);
         volume.NormalizeDistance(orbit);
     }
@@ -235,6 +263,9 @@ class Volume
     public Vector3 Min = new(float.MaxValue, float.MaxValue, float.MaxValue);
     public Vector3 Max = new(float.MinValue, float.MinValue, float.MinValue);
 
+    // Made to give user opportunity to can see nodes after create empty graph (and in some other cases) 
+    private const float DistanceOffset = 3f;
+
     public void Add(GameObject gameObject)
     {
         var position = gameObject.transform.position;
@@ -271,6 +302,6 @@ class Volume
 
     public void NormalizeDistance(DragMouseOrbit orbit)
     {
-        orbit.distance = GetRadius() * 2;
+        orbit.distance = GetRadius() * 2 + DistanceOffset;
     }
 }
