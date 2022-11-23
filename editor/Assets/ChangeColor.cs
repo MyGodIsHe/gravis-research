@@ -23,6 +23,7 @@ public class ChangeColor : MonoBehaviour
         DeselectColor = settingsParams.nodeColor;
         SelectColor = settingsParams.nodeColorOnSelected;
         mesh.material.color = DeselectColor;
+        
         ClickNode.instance.OnNodeSelected += ChangeColorOnSelected;
         ClickNode.instance.OnNodeDeselected += ChangeColorOnDeselected;
     }

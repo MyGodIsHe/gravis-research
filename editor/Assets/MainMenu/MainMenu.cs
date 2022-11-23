@@ -60,12 +60,15 @@ public class MainMenu : MonoBehaviour
         {
             File.Delete(path);    
         }
-        
-        var stream = new StreamWriter(path, true);
-        using (stream)
+
+        if (path != string.Empty)
         {
-            var saver = new Saver(stream);
-            await Task.Factory.StartNew(() => saver.Write(nodes));
+            var stream = new StreamWriter(path, true);
+            await using (stream)
+            {
+                var saver = new Saver(stream);
+                await Task.Factory.StartNew(() => saver.Write(nodes));
+            }
         }
     }
 
@@ -88,6 +91,8 @@ public class MainMenu : MonoBehaviour
 
         async void Select(string[] paths)
         {
+            if (!paths.Any()) return;
+            
             var path = paths[0];
             
             var gm = GraphManager.Get();

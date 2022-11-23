@@ -1,6 +1,6 @@
 ﻿namespace Utils
 {
-    public class NodeHelper
+    public static class NodeHelper
     {
         
     }

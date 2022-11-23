@@ -11,6 +11,7 @@ using Settings;
 using UI;
 using UI.Selection;
 using UnityEngine;
+using Utils;
 using Zenject;
 
 [AddComponentMenu("Camera-Control/Mouse Orbit with zoom")]
@@ -81,32 +82,36 @@ public class DragMouseOrbit : MonoBehaviour
         // create random node
         if (Input.GetKeyDown(KeyCode.X))
         {
-            var parent = ClickNode.instance.node.GetComponent<NodeView>().nodeLink;
-            if (parent != null && !_isSelecting)
+            var node = ClickNode.instance.node;
+            if (node != null)
             {
-                _isSelecting = true;
-                var point = Camera.main.WorldToScreenPoint(parent.gameObject.transform.position);
-                
-                var typeWheel = NodeTypeWheelSelector.Instance;
-                var forceWheel = NodeForceWheelSelector.Instance;
-                var input = NodeInputField.Instance;
-                
-                typeWheel.SetPosition(point);
-                forceWheel.SetPosition(point);
-                input.SetPosition(point);
-                
-                var type = await typeWheel.Select();
-                
-                var textStrategy = SelectionHelper.GetStrategy(type);
-                var text = await textStrategy.GetText();
+                var parent = node.GetComponent<NodeView>().nodeLink;
+                if (parent != null && !_isSelecting)
+                {
+                    _isSelecting = true;
+                    var point = Camera.main.WorldToScreenPoint(parent.gameObject.transform.position);
 
-                await Task.Yield();
+                    var typeWheel = NodeTypeWheelSelector.Instance;
+                    var forceWheel = NodeForceWheelSelector.Instance;
+                    var input = NodeInputField.Instance;
 
-                var forceStrategy = ForceHelper.GetStrategy(type);
-                var force = await forceStrategy.SelectForce();
-                
-                CreateNode(type, text, parent, force);
-                _isSelecting = false;
+                    typeWheel.SetPosition(point);
+                    forceWheel.SetPosition(point);
+                    input.SetPosition(point);
+
+                    var type = await typeWheel.Select();
+
+                    var textStrategy = SelectionHelper.GetStrategy(type);
+                    var text = await textStrategy.GetText();
+
+                    await Task.Yield();
+
+                    var forceStrategy = ForceHelper.GetStrategy(type);
+                    var force = await forceStrategy.SelectForce();
+
+                    CreateNode(type, text, parent, force);
+                    _isSelecting = false;
+                }
             }
         }
 
@@ -134,19 +139,30 @@ public class DragMouseOrbit : MonoBehaviour
 
         if (Input.GetKeyDown(KeyCode.Escape))
         {
-            if(settingsMenu.activeSelf)
+            if (settingsMenu.activeSelf)
             {
                 settingsMenu.SetActive(false);
                 mainMenu.SetActive(true);
             }
-            
+        }
+
+        if (Input.GetKeyDown(KeyCode.Delete))
+        {
+            var node = ClickNode.instance.node;
+            if (node != null)
+            {
+                var parent = node.GetComponent<NodeView>();
+                if (parent != null)
+                {
+                    RemoveNode(parent);
+                }
+            }
         }
     }
 
     public static async void CreateNode(NodeType type, string text, Node target, ENodeForce force)
     {
         var gm = GraphManager.Get();
-        var pIndex = Random.Range(0, gm.GetParts().Count);
         
         var node = new Node
         {
@@ -160,7 +176,7 @@ public class DragMouseOrbit : MonoBehaviour
             Random.Range(-1f, 1f)
         );
 
-        await gm.LinkNode(node, target, gm.GetParts()[pIndex], force);
+        await gm.LinkNode(node, target, gm.GetParts().GetRandom(), force);
     }
 
     public static float ClampAngle(float angle, float min, float max)
@@ -187,5 +203,15 @@ public class DragMouseOrbit : MonoBehaviour
 
         return Mathf.Clamp(dist - modify, distanceMin, distanceMax);;
     }
-    
+
+    private static void RemoveNode(NodeView view)
+    {
+        var gm = GraphManager.Get();
+        var graph = gm.GetParts().GetRandom();
+
+        if (graph.Count > 1)
+        {
+            gm.RemoveNode(view.nodeLink, graph);
+        }
+    }
 }
