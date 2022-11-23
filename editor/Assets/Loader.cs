@@ -64,7 +64,8 @@ public class Loader : MonoBehaviour
 
         RelinkSubspaces(loader.subspaces, loader.nodes);
 
-        await GraphManager.Get().Init(loader.nodes);
+        var gm = GraphManager.Get();
+        await gm.Init(loader.nodes);
     }
 
     private static void RelinkSubspaces(List<Subspace> subspaces, List<Node> nodes)

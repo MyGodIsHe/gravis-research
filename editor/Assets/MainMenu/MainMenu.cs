@@ -91,6 +91,8 @@ public class MainMenu : MonoBehaviour
 
         async void Select(string[] paths)
         {
+            if (!paths.Any()) return;
+            
             var path = paths[0];
             
             var gm = GraphManager.Get();

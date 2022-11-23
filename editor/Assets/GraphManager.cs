@@ -40,6 +40,8 @@ public class GraphManager : MonoBehaviour
     public async Task Init(List<Node> sceneNodes, bool centerCamera = true, bool normalizeDistance = true)
     {
         Camera.main.backgroundColor = settingsParams.BgColor;
+
+        Clear();
         
         volume = new Volume();
         parts = Node.FindIsolatedGraphs(sceneNodes);
@@ -80,7 +82,7 @@ public class GraphManager : MonoBehaviour
         
         parts.Clear();
     }
-
+    
     public List<List<Node>> GetParts()
     {
         return parts;
@@ -137,30 +139,39 @@ public class GraphManager : MonoBehaviour
         var view = node.gameObject.GetComponent<NodeView>();
         view.nodeLink = node;
         view.SetText(node.text);
+        _views.Add(view);
 
-        ReDraw(graph);
-        AlignByGraph(graph);
+        var all = parts.SelectMany(value => value).ToList();
+        ReDraw(all);
+        AlignByGraph(all);
     }
 
-    public void RemoveNode(Node node, List<Node> graph)
+    public async Task RemoveNode(Node node, List<Node> graph)
     {
-        var view = _views.FirstOrDefault(value => value.gameObject == node.gameObject);
+        if (!Validate()) return;
+        
+        node.ClearAllRelationships(graph);
+        graph.Remove(node);
+
+        var view = node.gameObject.GetComponent<NodeView>();
         _views.Remove(view);
         
-        graph.Remove(node); 
-        graph.ForEach(value => value.AggregateAllRelationships(Perform));
+        Destroy(view.gameObject);
         
-        Destroy(node.gameObject);
-        
+        parts = Node.FindIsolatedGraphs(graph);
+        await Node.AlignNodesByForceDirected(graph);
+
         ReDraw(graph);
         AlignByGraph(graph);
 
-        void Perform(Node self, List<Node> list)
+        bool Validate()
         {
-            if (self == node)
-            {
-                list.Remove(self);
-            }
+            var count = 0;
+            
+            if (node.inputs.Any()) count++;
+            if (node.trueOutputs.Any()) count++;
+
+            return count <= 1;
         }
     }
 
@@ -217,7 +228,7 @@ public class GraphManager : MonoBehaviour
     private void ReDraw(List<Node> graph)
     {
         // clear links
-        
+
         foreach (var n in graph)
         {
             NodeView nodeView = n.gameObject.GetComponent<NodeView>();
@@ -225,16 +236,18 @@ public class GraphManager : MonoBehaviour
             {
                 lineRenderer.positionCount = 0;
             }
+
             for (int i = 0; i < LineObjectList.Count; i++)
             {
                 Destroy(LineObjectList[i]);
             }
+
             for (int i = 0; i < n.gameObject.transform.childCount; i++)
             {
-                if(n.gameObject.transform.GetChild(i) != nodeView.Origin)
+                if (n.gameObject.transform.GetChild(i) != nodeView.Origin)
                 {
                     Destroy(n.gameObject.transform.GetChild(i).gameObject);
-                }   
+                }
             }
         }
 
@@ -243,7 +256,7 @@ public class GraphManager : MonoBehaviour
         var links = new HashSet<(Node from, Node to)>();
         foreach (var n in graph)
         {
-            var position = n.position *2;
+            var position = n.position * 2;
             position.y = -position.y;
             n.gameObject.transform.position = position;
 
@@ -253,8 +266,17 @@ public class GraphManager : MonoBehaviour
             foreach (var output_node in n.outputs)
                 links.Add((from: n, to: output_node));
         }
+
         foreach (var (from, to) in links)
+        {
+            if (from == null || to == null)
+                continue; 
+            
+            if (!definitions.ContainsKey(from) || !definitions.ContainsKey(to))
+                continue;
+
             LineTo(definitions[from], definitions[to]);
+        }
     }
 }
 
@@ -263,7 +285,7 @@ class Volume
     public Vector3 Min = new(float.MaxValue, float.MaxValue, float.MaxValue);
     public Vector3 Max = new(float.MinValue, float.MinValue, float.MinValue);
 
-    // Made to give user opportunity to can see nodes after create empty graph (and in some other cases) 
+    // Made to give user possibility to can see nodes after create empty graph (and in some other cases) 
     private const float DistanceOffset = 3f;
 
     public void Add(GameObject gameObject)
