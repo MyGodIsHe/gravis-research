@@ -25,6 +25,7 @@ public class GraphManager : MonoBehaviour
 
     private void Awake() {
         settingsParams = GetComponent<SettingsParams>();
+        singltone = this;
     }
 
     public static GraphManager Get()
@@ -189,7 +190,7 @@ public class GraphManager : MonoBehaviour
         volume.NormalizeDistance(orbit);
     }
 
-    private void LineTo(GameObject start, GameObject stop) 
+    public void LineTo(GameObject start, GameObject stop) 
     {
         var LineObject = new GameObject();
         if(LineObjectList != null || LineObjectList[LineObjectList.Count-1].GetComponent<LineRenderer>().positionCount == 2)
